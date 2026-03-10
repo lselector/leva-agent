@@ -1,24 +1,30 @@
 """Main agent loop with tool-call handling."""
 
 import json
-from typing import Dict, Any
 from .memory_store.short_term import ShortTermMemory
 from .tools.registry import TOOLS, get_tools_schema
+from .tools.memory_tools import soul_read
 from .models import chat
 from .config import PROMPTS_DIR
 
 
 # --------------------------------------------------------------
 def load_system_prompt() -> str:
-    """Load the system prompt from SYSTEM.md."""
-    return (
+    """Load system prompt with soul context."""
+    base = (
         PROMPTS_DIR / "SYSTEM.md"
     ).read_text(encoding="utf-8")
+    soul = soul_read()
+    return (
+        f"{base}\n\n"
+        f"# Core Identity (Soul)\n\n"
+        f"{soul}"
+    )
 
 
 # --------------------------------------------------------------
 def build_base_messages(stm: ShortTermMemory):
-    """Build message list with system prompt + history."""
+    """Build message list with system + history."""
     system = {
         "role": "system",
         "content": load_system_prompt(),
@@ -45,7 +51,7 @@ def _execute_tool(name, args):
 
 # --------------------------------------------------------------
 def _handle_tool_call(choice, stm):
-    """Handle a tool call and return final answer."""
+    """Handle a tool call and return answer."""
     tool_call = choice.message.tool_calls[0]
     name = tool_call.function.name
     args = _parse_tool_args(
