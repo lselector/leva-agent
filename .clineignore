@@ -1,0 +1,127 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Environment and package directories
+.env/
+.venv/
+env/
+venv/
+ENV/
+.Python
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Data, models, and outputs
+data/
+datasets/
+*.csv
+*.tsv
+*.xls
+*.xlsx
+*.parquet
+*.hdf5
+*.h5
+*.pkl
+*.joblib
+*.npz
+*.npy
+
+# Model artifacts
+*.pt
+*.pb
+*.onnx
+*.ckpt
+*.tflite
+
+# Notebook outputs
+*.out
+*.log
+
+# Miscelaneous
+*.swp
+*.bak
+*.tmp
+
+# Ignore images and plots
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.gif
+
+# User-specific files
+.idea/
+.vscode/
+*.code-workspace
+
+# Node dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.bundle/
+coverage/
+
+# System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Environment and config files
+.env
+.env.*
+.vscode/
+.idea/
+*.code-workspace
+
+# Package managers
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test artifacts
+*.spec.js
+*.test.js
+*.coverage
+
+# Generated files
+.sass-cache/
+.cache/
+*.map
+
+# OS files
+*.orig
+
+# Images and assets (optional—comment out if you are linting assets)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+
+# Compiled CSS from preprocessors
+*.css.map
+*.scssc
+*.sassc
+
+# Miscellaneous
+output/
+tmp/

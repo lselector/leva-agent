@@ -1,7 +1,12 @@
+"""Tool protocol interface."""
+
 from typing import Protocol, Any
 
 
+# --------------------------------------------------------------
 class Tool(Protocol):
+    """Protocol for tool implementations."""
+
     name: str
     description: str
 

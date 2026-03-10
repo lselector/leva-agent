@@ -1,1 +1,1 @@
-# memory_store package
+"""Memory store package."""

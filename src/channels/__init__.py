@@ -1,1 +1,1 @@
-# channels package
+"""Channels package."""

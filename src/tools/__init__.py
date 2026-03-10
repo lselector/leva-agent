@@ -1,1 +1,1 @@
-# tools package
+"""Tools package."""

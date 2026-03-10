@@ -1,1 +1,1 @@
-# mini-claw src package
+"""Mini-claw src package."""
