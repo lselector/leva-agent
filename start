@@ -10,8 +10,13 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-PYTHON=".venv/bin/python"
-UVICORN=".venv/bin/uvicorn"
+if [ -f ".venv/bin/python" ]; then
+    PYTHON=".venv/bin/python"
+    UVICORN=".venv/bin/uvicorn"
+else
+    PYTHON="python"
+    UVICORN="uvicorn"
+fi
 
 if [ "$1" = "cli" ]; then
     echo "Starting Jarvis CLI..."

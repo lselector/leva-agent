@@ -10,7 +10,6 @@ dependencies = [
   "fastapi>=0.115",
   "uvicorn[standard]>=0.34",
   "sse-starlette>=2.0",
-  "playwright>=1.49",
   "google-api-python-client>=2.100",
   "google-auth-httplib2>=0.2",
   "google-auth-oauthlib>=1.2",

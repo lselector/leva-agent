@@ -43,7 +43,7 @@ git clone git@github.com:lselector/jarvis_lev.git
 cd jarvis_lev
 
 # 2. Install dependencies
-uv sync
+./setup
 
 # 3. Configure your API key
 cp .env.example .env
