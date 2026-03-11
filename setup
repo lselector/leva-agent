@@ -1,21 +1,35 @@
 #!/usr/bin/env bash
-# Build the Rust project (downloads deps + compiles all crates).
+# Set up Jarvis after a fresh clone.
+# Run once before ./start
 #
 # Usage:  ./setup
 
 set -e
 cd "$(dirname "$0")"
 
+# ── 1. Check dependencies ─────────────────────────────────────────────────────
 if ! command -v cargo &>/dev/null; then
     echo "ERROR: cargo not found. Install Rust first:"
     echo "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
     exit 1
 fi
 
+# ── 2. Create required runtime directories ────────────────────────────────────
+mkdir -p memory/sessions memory/topics reference credentials
+echo "Created runtime directories (memory/sessions, memory/topics, reference, credentials)"
+
+# ── 3. Build ─────────────────────────────────────────────────────────────────
+echo ""
 echo "Building Jarvis (Rust)..."
 cargo build --release
 
 echo ""
-echo "Done. Next steps:"
-echo "  1. Copy and edit your API key:  cp ../.env.example .env  (or copy from parent)"
-echo "  2. Start Jarvis:                ./start"
+echo "Done."
+echo ""
+echo "Next steps:"
+echo "  1. Ensure OPENAI_API_KEY is set in your shell (or create .env from .env.example)"
+echo "  2. ./start"
+echo ""
+echo "Optional — Gmail integration only:"
+echo "  Place your Gmail OAuth credentials in credentials/"
+echo "  See README.md for details"
