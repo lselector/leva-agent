@@ -1,1 +1,0 @@
-"""Mini-claw src package."""

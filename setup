@@ -1,24 +1,21 @@
 #!/usr/bin/env bash
-# Install project dependencies into .venv
+# Build the Rust project (downloads deps + compiles all crates).
 #
-# Usage:
-#   ./setup
+# Usage:  ./setup
 
 set -e
+cd "$(dirname "$0")"
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR"
-
-if ! command -v uv &>/dev/null; then
-    echo "ERROR: uv not found. Install it first:"
-    echo "  curl -LsSf https://astral.sh/uv/install.sh | sh"
+if ! command -v cargo &>/dev/null; then
+    echo "ERROR: cargo not found. Install Rust first:"
+    echo "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
     exit 1
 fi
 
-echo "Installing dependencies..."
-uv sync
+echo "Building Jarvis (Rust)..."
+cargo build --release
 
 echo ""
 echo "Done. Next steps:"
-echo "  1. Copy and edit your API key:  cp .env.example .env"
+echo "  1. Copy and edit your API key:  cp ../.env.example .env  (or copy from parent)"
 echo "  2. Start Jarvis:                ./start"

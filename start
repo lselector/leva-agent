@@ -1,50 +1,40 @@
 #!/usr/bin/env bash
-# Start Jarvis — web UI or CLI mode
+# Start Jarvis (Rust version).
 #
 # Usage:
-#   ./start          # web UI (two servers)
-#   ./start cli      # old CLI REPL mode
+#   ./start        — web UI (both servers)
+#   ./start cli    — CLI REPL
 
 set -e
+cd "$(dirname "$0")"
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR"
-
-if [ -f ".venv/bin/python" ]; then
-    PYTHON=".venv/bin/python"
-    UVICORN=".venv/bin/uvicorn"
-else
-    PYTHON="python"
-    UVICORN="uvicorn"
+# Use release build if available, otherwise debug
+BIN_DIR=target/release
+if [ ! -d "$BIN_DIR" ] || [ ! -f "$BIN_DIR/server_llm" ]; then
+    BIN_DIR=target/debug
+fi
+if [ ! -f "$BIN_DIR/server_llm" ]; then
+    echo "Binaries not found. Run ./setup first."
+    exit 1
 fi
 
-if [ "$1" = "cli" ]; then
-    echo "Starting Jarvis CLI..."
-    $PYTHON -m src
-    exit 0
+# Export JARVIS_BASE_DIR so the Rust code finds frontend/, soul/, etc.
+export JARVIS_BASE_DIR="$(pwd)"
+
+if [ "${1}" = "cli" ]; then
+    exec "$BIN_DIR/jarvis-cli"
 fi
 
-# Kill any existing instances
-kill $(lsof -ti:8000) 2>/dev/null || true
-kill $(lsof -ti:8001) 2>/dev/null || true
-sleep 1
+# Start both servers
+echo "Starting Server LLM  on http://localhost:8000"
+echo "Starting Server Auto on http://localhost:8001"
+"$BIN_DIR/server_auto" &
+SERVER_AUTO_PID=$!
+"$BIN_DIR/server_llm" &
+SERVER_LLM_PID=$!
 
-# Start Server B (Automation Engine)
-$UVICORN src.server_auto.app:app \
-    --host 127.0.0.1 --port 8001 &
-PID_AUTO=$!
+trap "kill $SERVER_AUTO_PID $SERVER_LLM_PID 2>/dev/null" EXIT INT TERM
 
-# Start Server A (LLM Gateway + Frontend)
-$UVICORN src.server_llm.app:app \
-    --host 127.0.0.1 --port 8000 &
-PID_LLM=$!
-
-echo ""
-echo "⚡ Jarvis is running:"
-echo "   Browser:  http://localhost:8000"
-echo "   Auto API: http://localhost:8001"
-echo "   Press Ctrl+C to stop"
-echo ""
-
-trap "kill $PID_LLM $PID_AUTO 2>/dev/null" EXIT
+echo "Open http://localhost:8000 in your browser"
+echo "Press Ctrl+C to stop."
 wait

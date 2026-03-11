@@ -1,0 +1,42 @@
+[workspace]
+members = ["common", "server_llm", "server_auto", "cli"]
+resolver = "2"
+
+[workspace.dependencies]
+# async runtime
+tokio = { version = "1", features = ["full"] }
+
+# web framework
+axum = { version = "0.8", features = ["http1", "http2", "macros"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "fs", "trace"] }
+
+# serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# HTTP client
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+
+# OpenAI
+async-openai = "0.28"
+
+# environment / config
+dotenvy = "0.15"
+
+# logging / tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# utilities
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1"
+thiserror = "2"
+tokio-tungstenite = { version = "0.24" }
+futures = "0.3"
+base64 = "0.22"
+oauth2 = "5"
+bytes = "1"
+urlencoding = "2"
+tokio-stream = "0.1"

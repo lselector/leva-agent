@@ -1,39 +1,26 @@
 #!/usr/bin/env bash
-# -------------------------------------------------------
-# stop — Kill Jarvis servers (ports 8000 & 8001)
+# Stop Jarvis Rust servers (ports 8000 & 8001)
 # Usage: ./stop
-# -------------------------------------------------------
-
-set -e
-
-echo ""
-echo "🛑 Stopping Jarvis..."
-echo ""
 
 killed=0
 
-# Kill Server A (LLM Gateway) on port 8000
 pids_8000=$(lsof -ti:8000 2>/dev/null || true)
 if [ -n "$pids_8000" ]; then
-    echo "   Killing Server A (port 8000)..."
+    echo "Killing server_llm (port 8000)..."
     kill $pids_8000 2>/dev/null || true
     killed=1
 fi
 
-# Kill Server B (Automation) on port 8001
 pids_8001=$(lsof -ti:8001 2>/dev/null || true)
 if [ -n "$pids_8001" ]; then
-    echo "   Killing Server B (port 8001)..."
+    echo "Killing server_auto (port 8001)..."
     kill $pids_8001 2>/dev/null || true
     killed=1
 fi
 
 if [ "$killed" -eq 1 ]; then
     sleep 1
-    echo ""
-    echo "✅ Jarvis stopped."
+    echo "Jarvis stopped."
 else
-    echo "   No Jarvis processes found."
+    echo "No Jarvis processes found."
 fi
-
-echo ""
