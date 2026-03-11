@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1">
+  <title>Jarvis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect"
+    href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <div id="sidebar-header">
+        <div id="logo">
+          <span id="logo-icon">⚡</span>
+          <span id="logo-text">Jarvis</span>
+        </div>
+      </div>
+
+      <div id="nav-tabs">
+        <button class="nav-tab active"
+          data-view="chat-view">
+          <span class="tab-icon">💬</span>
+          <span class="tab-label">Chat</span>
+        </button>
+        <button class="nav-tab"
+          data-view="files-view">
+          <span class="tab-icon">📁</span>
+          <span class="tab-label">Files</span>
+        </button>
+        <button class="nav-tab"
+          data-view="jobs-view">
+          <span class="tab-icon">⚙️</span>
+          <span class="tab-label">Jobs</span>
+        </button>
+        <button class="nav-tab"
+          data-view="settings-view">
+          <span class="tab-icon">🔧</span>
+          <span class="tab-label">Settings</span>
+        </button>
+      </div>
+
+      <div id="session-list">
+        <div id="session-header">
+          <span id="session-title">Sessions</span>
+          <button id="new-chat-btn"
+            title="New Chat">+</button>
+        </div>
+        <div id="sessions"></div>
+      </div>
+
+      <div id="sidebar-footer">
+        <span id="status-dot"></span>
+        <span id="status-text">Offline</span>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="content">
+
+      <!-- Chat View -->
+      <div id="chat-view" class="view active">
+        <div id="chat-header">
+          <h2 id="chat-title">New Chat</h2>
+        </div>
+        <div id="messages"></div>
+        <div id="chat-input-area">
+          <div id="attachment-preview"></div>
+          <div id="input-wrapper">
+            <button id="attach-btn"
+              title="Attach files">
+              <span id="attach-icon">+</span>
+            </button>
+            <input type="file" id="chat-file-input"
+              multiple accept="image/*,.pdf,.txt,.md,.py,.js,.json,.csv,.html,.css">
+            <textarea id="chat-input"
+              placeholder="Message Jarvis..."
+              rows="1"></textarea>
+            <button id="send-btn"
+              title="Send">
+              <span id="send-icon">↑</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Files View -->
+      <div id="files-view" class="view">
+        <div id="files-header">
+          <h2>Files</h2>
+        </div>
+        <div id="files-content">
+          <div id="file-drop-zone">
+            <span id="drop-icon">📄</span>
+            <p id="drop-text">
+              Drop files here or click to upload
+            </p>
+            <input type="file" id="file-input"
+              multiple>
+          </div>
+          <div id="file-list"></div>
+        </div>
+      </div>
+
+      <!-- Jobs View -->
+      <div id="jobs-view" class="view">
+        <div id="jobs-header">
+          <h2>Jobs</h2>
+        </div>
+        <div id="jobs-content">
+          <p class="empty-state">
+            No jobs running
+          </p>
+        </div>
+      </div>
+
+      <!-- Settings View -->
+      <div id="settings-view" class="view">
+        <div id="settings-header">
+          <h2>Settings</h2>
+        </div>
+        <div id="settings-content">
+          <div class="settings-group">
+            <label class="settings-label"
+              for="model-select">Model</label>
+            <select id="model-select">
+              <option value="gpt-4.1-mini">
+                gpt-4.1-mini
+              </option>
+              <option value="gpt-4.1">
+                gpt-4.1
+              </option>
+              <option value="gpt-4o">
+                gpt-4o
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="utils.js"></script>
+  <script src="markdown.js"></script>
+  <script src="chat.js"></script>
+  <script src="files.js"></script>
+  <script src="jobs.js"></script>
+  <script src="settings.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

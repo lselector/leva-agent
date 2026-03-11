@@ -19,3 +19,9 @@ MODEL_NAME = os.getenv(
 OPENAI_API_KEY = os.getenv(
     "OPENAI_API_KEY", ""
 )
+
+LLM_PORT = int(os.getenv("LLM_PORT", "8000"))
+AUTO_PORT = int(os.getenv("AUTO_PORT", "8001"))
+AUTO_BASE_URL = (
+    f"http://127.0.0.1:{AUTO_PORT}"
+)

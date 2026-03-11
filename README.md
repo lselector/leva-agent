@@ -1,4 +1,4 @@
-# Mini-Claw – Minimal Local OpenClaw-Style Agent
+# Jarvis – Local AI Agent with Web UI
 
 A lightweight, local AI agent inspired by
 [OpenClaw](https://docs.openclaw.ai/) that runs
@@ -6,15 +6,27 @@ entirely on your laptop with **no database**.
 
 ## Features
 
+- **Web UI** – beautiful dark-themed chat
+  interface with streaming responses
+- **Two-server architecture** – LLM Gateway
+  (port 8000) + Automation Engine (port 8001)
 - **Tool calling** – file read/write, 3-layer
-  markdown memory
+  markdown memory, with multi-round tool loops
+- **SSE streaming** – tokens appear progressively
+  in the browser as the LLM generates them
+- **Session management** – persistent chat
+  sessions saved to JSON files
+- **File browser** – browse, view, and upload
+  files through the web UI
+- **Jobs panel** – view running/completed
+  background jobs
+- **Model switching** – change LLM model from
+  the Settings panel
 - **3-Layer Memory Architecture**
   - Layer 1 (Soul): core identity, always loaded
   - Layer 2 (Memory): daily logs + topic summaries
   - Layer 3 (Reference): full document library
-- **Short-term chat buffer** – in-RAM sliding
-  window of recent messages
-- **CLI REPL** – simple interactive loop
+- **CLI fallback** – `./start cli` for terminal
 
 ## Quick Start
 
@@ -23,77 +35,152 @@ entirely on your laptop with **no database**.
 git clone git@github.com:lselector/jarvis_lev.git
 cd jarvis_lev
 
-# 2. Create a virtual environment & install deps
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+# 2. Install dependencies
+uv sync
 
 # 3. Configure your API key
 cp .env.example .env
 # edit .env and set OPENAI_API_KEY
 
-# 4. Run the agent
-python -m src.main
+# 4. Run the web UI
+./start
+# Opens at http://localhost:8000
+
+# 5. Or run the CLI
+./start cli
 ```
+
+## Architecture
+
+```
+┌─────────────┐     ┌──────────────┐
+│  Browser UI  │────▶│  Server A     │
+│  (frontend/) │◀────│  LLM Gateway  │
+│              │ SSE │  :8000        │
+└─────────────┘     └──────┬───────┘
+                           │ HTTP
+                    ┌──────▼───────┐
+                    │  Server B     │
+                    │  Automation   │
+                    │  :8001        │
+                    └──────────────┘
+```
+
+- **Server A** (port 8000): Serves the frontend,
+  handles `/api/chat` (SSE streaming), session
+  management, model switching, and dispatches
+  tool calls to Server B.
+- **Server B** (port 8001): File operations,
+  background jobs, and browser automation
+  (Playwright-powered: navigate, extract,
+  screenshot, Gmail, LinkedIn).
 
 ## Directory Layout
 
 ```
+├── start                  # Launch script
 ├── pyproject.toml
-├── .env.example
+├── frontend/              # Web UI
+│   ├── index.html
+│   ├── styles.css         # All styles here
+│   ├── app.js             # Tab/session logic
+│   ├── chat.js            # Chat + streaming
+│   ├── files.js           # File browser
+│   ├── jobs.js            # Jobs panel
+│   ├── settings.js        # Model switching
+│   ├── markdown.js        # MD → HTML
+│   └── utils.js           # Helpers
 ├── soul/                  # Layer 1 – Soul
-│   ├── soul.md            # core identity
-│   ├── agents.md          # agent configuration
-│   └── user.md            # user profile
+│   ├── soul.md
+│   ├── agents.md
+│   └── user.md
 ├── memory/                # Layer 2 – Memory
 │   ├── YYYY-MM-DD.md      # daily logs
-│   └── topics/            # topic summaries
-│       └── <topic>.md
+│   ├── sessions/          # chat sessions
+│   └── topics/
 ├── reference/             # Layer 3 – Reference
-│   └── <document>.md      # full documents
 ├── prompts/
-│   ├── SYSTEM.md          # system prompt
-│   └── TOOLS.md           # tool descriptions
+│   ├── SYSTEM.md
+│   └── TOOLS.md
 ├── src/
-│   ├── main.py            # CLI entry point
 │   ├── config.py          # paths & env vars
-│   ├── models.py          # LLM wrapper (OpenAI)
-│   ├── agent_loop.py      # main agent loop
+│   ├── models.py          # LLM wrapper
+│   ├── agent_loop.py      # CLI agent loop
+│   ├── server_llm/        # Server A
+│   │   ├── app.py
+│   │   ├── routes_chat.py
+│   │   ├── routes_models.py
+│   │   ├── session_store.py
+│   │   ├── streaming.py
+│   │   └── tool_dispatch.py
+│   ├── server_auto/       # Server B
+│   │   ├── app.py
+│   │   ├── routes_files.py
+│   │   ├── routes_jobs.py
+│   │   ├── routes_browser.py
+│   │   ├── job_runner.py
+│   │   ├── browser_manager.py
+│   │   ├── gmail_actions.py
+│   │   └── linkedin_actions.py
 │   ├── channels/
-│   │   └── cli.py         # REPL channel
+│   │   └── cli.py
 │   ├── tools/
-│   │   ├── base.py        # Tool protocol
-│   │   ├── files.py       # file_read/write
-│   │   ├── memory_tools.py# 3-layer memory
-│   │   └── registry.py    # tool → function map
+│   │   ├── base.py
+│   │   ├── files.py
+│   │   ├── memory_tools.py
+│   │   └── registry.py
 │   └── memory_store/
-│       └── short_term.py  # in-RAM buffer
+│       └── short_term.py
 └── myprompts/             # dev prompts
 ```
+
+## API Endpoints
+
+### Server A (LLM Gateway) — port 8000
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/health` | Health check |
+| POST | `/api/chat` | Chat (SSE stream) |
+| GET | `/api/chat/history` | List sessions |
+| GET | `/api/chat/{id}` | Get session |
+| DELETE | `/api/chat/{id}` | Delete session |
+| GET | `/api/models` | List models |
+| PUT | `/api/models/current` | Switch model |
+
+### Server B (Automation) — port 8001
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Health check |
+| GET | `/files/list` | List files |
+| POST | `/files/read` | Read a file |
+| POST | `/files/write` | Write a file |
+| POST | `/jobs/start` | Start a job |
+| GET | `/jobs/list` | List all jobs |
+| GET | `/jobs/status/{id}` | Job status |
+| POST | `/browser/navigate` | Go to URL |
+| POST | `/browser/extract` | Extract text |
+| POST | `/browser/screenshot` | Screenshot |
+| POST | `/browser/click` | Click element |
+| POST | `/browser/type` | Type text |
+| GET | `/browser/content` | Page HTML |
+| POST | `/browser/close` | Close browser |
+| POST | `/browser/gmail/inbox` | Gmail inbox |
+| POST | `/browser/gmail/compose` | Compose |
+| POST | `/browser/linkedin/feed` | Feed |
+| POST | `/browser/linkedin/like` | Like post |
 
 ## 3-Layer Memory Architecture
 
 ### Layer 1 – Soul (Core Identity)
 Files in `soul/` are read **every turn** and
-injected into the system prompt. The agent
-always knows its purpose, personality, and
-who the user is.
-
-- `soul.md` – identity and principles
-- `agents.md` – agent configuration
-- `user.md` – user profile and preferences
+injected into the system prompt.
 
 ### Layer 2 – Memory (Working Memory)
-Short (under 4KB) summaries and breadcrumbs
-stored in `memory/`:
-
-- `YYYY-MM-DD.md` – daily append-only logs
-- `topics/<name>.md` – topic-specific summaries
+Short summaries in `memory/`:
+daily logs + topic summaries.
 
 ### Layer 3 – Reference (Document Library)
-Full documents and long-form content stored
-in `reference/`. No size limit. Memory files
-can point here as breadcrumbs.
+Full documents in `reference/`.
 
 ## License
 

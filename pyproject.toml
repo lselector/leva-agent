@@ -7,4 +7,8 @@ dependencies = [
   "python-dotenv>=1.0",
   "httpx>=0.27",
   "openai>=1.0",
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.34",
+  "sse-starlette>=2.0",
+  "playwright>=1.49",
 ]

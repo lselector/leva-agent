@@ -1,0 +1,10 @@
+[
+  {
+    "role": "user",
+    "content": "please extract text from the attached image"
+  },
+  {
+    "role": "assistant",
+    "content": "Here is the extracted text from the image:\n\n---\n\n**AI Updates - Mar 06, 2026**\n\n- **Crowd-sourced \"LM Arena\" Leaderboard**  \n- **Mercury 2 by Inception Labs**  \n- **OpenAI GPT-5.4 & GPT-5.3 Instant**  \n- **Google Gemini 3.1 Flash-Lite & Pro**  \n- **Gemini Nano Banana 2**  \n- **Qwen3-Coder-Next**  \n- **Claude Co-Work Can Schedule Tasks**  \n- **Anthropic Skill Creator tool (skill)**  \n- **Claude Code MEMORY.md**  \n- **Claude Code voice mode feature**\n\n---\n\n- **Alibaba\u2019s CoPaw, ModelScope**  \n- **Claude Code vs OpenClaw**  \n- **Claude Code supports Remote Control**  \n- **Claude now remembers your work habits**  \n- **From Apps & SaaS to Generic Agent**  \n- **ClawX - FREE Desktop App for OpenClaw AI Agents!**  \n- **OpenClaw + Simflow AI Phone Voice Agent**  \n- **Accomplish (Openwork) - AI Desktop Agent**  \n- **NullClaw against OpenClaw**  \n- **Harness Engineering**  \n- **MaxClaw - Minimax's agent**\n\n---\n\n- **Qwen3.5-9B - text, images, short videos**  \n- **OpenClaw Tips**  \n- **Tools That Make OpenClaw Actually Useful**  \n- **Toggle - browser agent skill for OpenClaw**  \n- **SHARE + Sidecar - Model That Learns**  \n- **Kane AI (KaneAI) software testing assistant**  \n- **Claude Code + Telegram bot**  \n- **Apple Updates (M5, Neo)**  \n- **AI Agent Making Money and Doing Marketing**  \n- **The 2028 Global Intelligence Crisis\" report**  \n- **AT&T cuts costs 90% by using multi-agent architecture**  \n- **Perplexity Computer with Max Plan $200/mo**  \n- **\"Ilya Didn\u2019t Leave OpenAI for Nothing\"**  \n- **LFM2-24B-A2B Open Model from Liquid AI**  \n- **CodeBuff, a new open-source AI coding agent**  \n- **Humanize Text, Remove AI Accent**  \n- **Antropic vs US Dept of Defense**\n\n---\n\n- **Moonshots**  \n- **Interview with Andrew Ng**  \n- **SaaS Collapse into Personal AI Agents**  \n- **Jobs, Layoffs, demand for AI Engineers**\n\n---\n\nLet me know if you want this in any specific format or saved to a file!"
+  }
+]

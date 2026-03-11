@@ -1,3 +1,45 @@
 #!/usr/bin/env bash
-# Start the Mini-Claw agent
-python -m src
+# Start Jarvis — web UI or CLI mode
+#
+# Usage:
+#   ./start          # web UI (two servers)
+#   ./start cli      # old CLI REPL mode
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+
+PYTHON=".venv/bin/python"
+UVICORN=".venv/bin/uvicorn"
+
+if [ "$1" = "cli" ]; then
+    echo "Starting Jarvis CLI..."
+    $PYTHON -m src
+    exit 0
+fi
+
+# Kill any existing instances
+kill $(lsof -ti:8000) 2>/dev/null || true
+kill $(lsof -ti:8001) 2>/dev/null || true
+sleep 1
+
+# Start Server B (Automation Engine)
+$UVICORN src.server_auto.app:app \
+    --host 127.0.0.1 --port 8001 &
+PID_AUTO=$!
+
+# Start Server A (LLM Gateway + Frontend)
+$UVICORN src.server_llm.app:app \
+    --host 127.0.0.1 --port 8000 &
+PID_LLM=$!
+
+echo ""
+echo "⚡ Jarvis is running:"
+echo "   Browser:  http://localhost:8000"
+echo "   Auto API: http://localhost:8001"
+echo "   Press Ctrl+C to stop"
+echo ""
+
+trap "kill $PID_LLM $PID_AUTO 2>/dev/null" EXIT
+wait
