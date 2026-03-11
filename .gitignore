@@ -208,3 +208,6 @@ __marimo__/
 
 # Memory files (optional – uncomment to keep out of git)
 # memory/
+
+# Credentials (OAuth tokens, API keys)
+credentials/

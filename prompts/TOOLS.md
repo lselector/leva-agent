@@ -19,3 +19,19 @@ Available tools:
 - reference_write(name, content): Write ref doc.
 - reference_list(): List all reference docs.
 - reference_search(query): Search reference docs.
+
+## Email Tools (Gmail API)
+- gmail_inbox(max_results=15): Get recent inbox emails.
+- gmail_send(to, subject, body): Send an email.
+- gmail_search(query, max_results=10): Search emails (Gmail query syntax, e.g. 'is:unread', 'from:bob').
+
+## Web Research Tools (CDP)
+- web_search(query): Search Google, return top results (title, url, snippet).
+- web_fetch(url): Fetch a URL and return its main text content (max 10k chars).
+
+## LinkedIn Tools (CDP)
+- linkedin_feed(): Get recent LinkedIn feed posts.
+- linkedin_like(post_index, dry_run=True): Like a feed post by index (dry_run=true to preview).
+
+## Research Fallback (Perplexity API)
+- web_research(query): Web-grounded research answer via Perplexity API. No browser needed. Requires PERPLEXITY_API_KEY in .env.

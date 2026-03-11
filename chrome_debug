@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Launch Chrome with CDP remote debugging on port 9222.
+#
+# Chrome REQUIRES --user-data-dir to be non-default when using
+# --remote-debugging-port. We use ~/Library/Application Support/Google/ChromeCDP
+# so your regular Chrome stays unaffected and runs simultaneously.
+#
+# First run: a fresh Chrome window opens (log into sites you need).
+# Subsequent runs: reuses the same profile — sessions persist.
+#
+# Usage:
+#   ./chrome_debug         # start CDP Chrome (runs alongside regular Chrome)
+#   ./chrome_debug --reset # delete CDP profile and start fresh
+
+PORT=9222
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+CDP_PROFILE="$HOME/Library/Application Support/Google/ChromeCDP"
+
+# --- Already running with CDP? ---
+if curl -s "http://127.0.0.1:$PORT/json" > /dev/null 2>&1; then
+    echo "Chrome CDP already running on :$PORT"
+    exit 0
+fi
+
+# --- Reset option ---
+if [[ "$1" == "--reset" ]]; then
+    echo "Removing CDP profile at: $CDP_PROFILE"
+    rm -rf "$CDP_PROFILE"
+fi
+
+# --- Launch CDP Chrome alongside regular Chrome ---
+echo "Starting CDP Chrome on :$PORT ..."
+echo "Profile: $CDP_PROFILE"
+"$CHROME" \
+    --remote-debugging-port=$PORT \
+    --user-data-dir="$CDP_PROFILE" \
+    --no-first-run \
+    --no-default-browser-check \
+    "$@" &
+
+sleep 3
+if curl -s "http://127.0.0.1:$PORT/json" > /dev/null 2>&1; then
+    TAB_COUNT=$(curl -s "http://127.0.0.1:$PORT/json" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "?")
+    echo "Chrome CDP ready on :$PORT ($TAB_COUNT tabs)"
+    echo ""
+    echo "NOTE: This is a separate Chrome profile."
+    echo "Log into Gmail and LinkedIn in this window to use those tools."
+else
+    echo "Warning: Chrome launched but CDP not yet responding."
+    echo "Wait a moment, then: curl http://127.0.0.1:$PORT/json"
+fi

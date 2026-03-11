@@ -22,6 +22,13 @@ entirely on your laptop with **no database**.
   background jobs
 - **Model switching** – change LLM model from
   the Settings panel
+- **Gmail integration** – read inbox, send email,
+  search via official Gmail API (fast, OAuth2)
+- **Web research** – search Google and fetch pages
+  via Chrome DevTools Protocol (CDP)
+- **LinkedIn** – read feed and like posts via CDP
+- **Perplexity fallback** – web research without
+  browser via Perplexity API
 - **3-Layer Memory Architecture**
   - Layer 1 (Soul): core identity, always loaded
   - Layer 2 (Memory): daily logs + topic summaries
@@ -48,6 +55,44 @@ cp .env.example .env
 
 # 5. Or run the CLI
 ./start cli
+```
+
+## New API Endpoints (Server B :8001)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/gmail/inbox` | Get recent inbox emails |
+| GET  | `/api/gmail/email/{id}` | Get full email |
+| POST | `/api/gmail/send` | Send an email |
+| POST | `/api/gmail/search` | Search emails |
+| GET  | `/api/gmail/labels` | List Gmail labels |
+| GET  | `/api/web/tabs` | List Chrome tabs |
+| POST | `/api/web/search` | Google search via CDP |
+| POST | `/api/web/fetch` | Fetch page content |
+| POST | `/api/web/screenshot` | Screenshot a URL |
+| POST | `/api/linkedin/feed` | LinkedIn feed posts |
+| POST | `/api/linkedin/like` | Like a feed post |
+
+### Setup: Gmail OAuth2
+```bash
+# 1. Download credentials from Google Cloud Console
+#    → save as credentials/gmail_credentials.json
+# 2. Run one-time auth flow
+python -m src.gmail_api.auth
+# Browser opens → log in → grant access → done
+```
+
+### Setup: Web / LinkedIn via CDP
+```bash
+# Start Chrome with remote debugging
+./chrome_debug
+# Chrome must stay running while using web/LinkedIn tools
+```
+
+### Setup: Perplexity fallback
+```bash
+# Add to .env
+PERPLEXITY_API_KEY=pplx-...
 ```
 
 ## Architecture
