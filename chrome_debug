@@ -36,6 +36,7 @@ echo "Profile: $CDP_PROFILE"
     --user-data-dir="$CDP_PROFILE" \
     --no-first-run \
     --no-default-browser-check \
+    --disable-blink-features=AutomationControlled \
     "$@" &
 
 # Wait up to 20s for CDP to respond (Chrome on first launch can be slow)

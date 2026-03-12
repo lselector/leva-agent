@@ -57,25 +57,31 @@ impl CdpSession {
         Ok(Self { ws })
     }
 
-    /// Send a CDP command and wait for its response.
+    /// Send a CDP command and wait for its response (10 s timeout).
     pub async fn send(&mut self, method: &str, params: Value) -> Result<Value> {
         let id = MSG_ID.fetch_add(1, Ordering::Relaxed);
         let msg = json!({"id": id, "method": method, "params": params});
         self.ws.send(Message::Text(msg.to_string().into())).await?;
 
-        // Read until we get a message with matching id
-        loop {
-            match self.ws.next().await {
-                Some(Ok(Message::Text(text))) => {
-                    let v: Value = serde_json::from_str(&text).unwrap_or_default();
-                    if v["id"].as_u64() == Some(id) {
-                        return Ok(v["result"].clone());
+        // Read until we get a message with matching id, with a hard timeout.
+        let result = tokio::time::timeout(std::time::Duration::from_secs(10), async {
+            loop {
+                match self.ws.next().await {
+                    Some(Ok(Message::Text(text))) => {
+                        let v: Value = serde_json::from_str(&text).unwrap_or_default();
+                        if v["id"].as_u64() == Some(id) {
+                            return Ok::<Value, anyhow::Error>(v["result"].clone());
+                        }
                     }
+                    Some(Err(e)) => bail!("CDP WS error: {e}"),
+                    None => bail!("CDP WS closed"),
+                    _ => {}
                 }
-                Some(Err(e)) => bail!("CDP WS error: {e}"),
-                None => bail!("CDP WS closed"),
-                _ => {}
             }
+        }).await;
+        match result {
+            Ok(inner) => inner,
+            Err(_) => bail!("CDP command '{method}' timed out after 10s"),
         }
     }
 
@@ -123,4 +129,32 @@ pub async fn open_session(url: &str) -> Result<(String, CdpSession)> {
     session.send("Page.enable", json!({})).await?;
     session.navigate(url).await?;
     Ok((tab.id, session))
+}
+
+/// Attach to an existing responsive tab whose URL starts with `url_prefix`.
+/// Probes each candidate with a quick evaluate to skip zombie tabs.
+/// Returns `None` if no responsive tab is found.
+pub async fn attach_session(url_prefix: &str) -> Result<Option<(String, CdpSession)>> {
+    let tabs = list_tabs().await?;
+    let mut candidates: Vec<_> = tabs.into_iter()
+        .filter(|t| t.url.starts_with(url_prefix) && !t.ws_url.is_empty())
+        .collect();
+    // Prefer fully-loaded tabs first.
+    candidates.sort_by_key(|t| if t.title.contains("Feed") { 0usize } else { 1 });
+
+    for t in candidates {
+        if let Ok(mut session) = CdpSession::connect(&t.ws_url).await {
+            // Quick probe: if evaluate responds within 3s, this tab is healthy.
+            let probe = tokio::time::timeout(
+                std::time::Duration::from_secs(3),
+                session.evaluate("1")
+            ).await;
+            if probe.is_ok() {
+                return Ok(Some((t.id, session)));
+            }
+            // Unresponsive zombie tab — close it to avoid accumulation.
+            let _ = close_tab(&t.id).await;
+        }
+    }
+    Ok(None)
 }

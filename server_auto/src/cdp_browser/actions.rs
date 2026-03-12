@@ -2,7 +2,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use super::client::{close_tab, open_session};
+use super::client::{attach_session, close_tab, open_session};
 
 // ---------------------------------------------------------------
 
@@ -104,8 +104,16 @@ pub struct LinkedInPost {
 }
 
 pub async fn linkedin_feed() -> Result<Vec<LinkedInPost>> {
-    let (tab_id, mut session) = open_session("https://www.linkedin.com/feed/").await?;
-    tokio::time::sleep(std::time::Duration::from_secs(4)).await;
+    // Reuse the existing open LinkedIn tab to avoid bot detection on new-tab navigation.
+    let (tab_id, mut session, opened_new) =
+        match attach_session("https://www.linkedin.com/feed/").await? {
+            Some((id, s)) => (id, s, false),
+            None => {
+                let (id, s) = open_session("https://www.linkedin.com/feed/").await?;
+                (id, s, true)
+            }
+        };
+    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
     session.evaluate("window.scrollBy(0, 800)").await?;
     tokio::time::sleep(std::time::Duration::from_secs(1)).await;
 
@@ -140,15 +148,22 @@ pub async fn linkedin_feed() -> Result<Vec<LinkedInPost>> {
     })()"#;
 
     let raw = session.evaluate(script).await?;
-    let _ = close_tab(&tab_id).await;
+    if opened_new { let _ = close_tab(&tab_id).await; }
     let posts: Vec<LinkedInPost> = serde_json::from_str(raw.as_str().unwrap_or("[]"))
         .unwrap_or_default();
     Ok(posts.into_iter().filter(|p| !p.author.is_empty()).collect())
 }
 
 pub async fn linkedin_like(post_index: usize, dry_run: bool) -> Result<Value> {
-    let (tab_id, mut session) = open_session("https://www.linkedin.com/feed/").await?;
-    tokio::time::sleep(std::time::Duration::from_secs(4)).await;
+    let (tab_id, mut session, opened_new) =
+        match attach_session("https://www.linkedin.com/feed/").await? {
+            Some((id, s)) => (id, s, false),
+            None => {
+                let (id, s) = open_session("https://www.linkedin.com/feed/").await?;
+                (id, s, true)
+            }
+        };
+    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
     let info_script = format!(r#"
     (function() {{
@@ -178,7 +193,7 @@ pub async fn linkedin_like(post_index: usize, dry_run: bool) -> Result<Value> {
     if dry_run {
         info["dry_run"] = json!(true);
         info["action"] = json!("not liked (dry run)");
-        let _ = close_tab(&tab_id).await;
+        if opened_new { let _ = close_tab(&tab_id).await; }
         return Ok(info);
     }
 
@@ -196,6 +211,6 @@ pub async fn linkedin_like(post_index: usize, dry_run: bool) -> Result<Value> {
     let result = session.evaluate(&click_script).await?;
     tokio::time::sleep(std::time::Duration::from_secs(1)).await;
     info["action"] = result;
-    let _ = close_tab(&tab_id).await;
+    if opened_new { let _ = close_tab(&tab_id).await; }
     Ok(info)
 }

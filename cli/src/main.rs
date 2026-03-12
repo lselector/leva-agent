@@ -1,7 +1,7 @@
 /// Jarvis CLI — interactive REPL with tool-call loop.
 use std::collections::HashMap;
-use std::io::{self, Write};
 use common::{config, tools::{memory::soul_read, registry}};
+use rustyline::{DefaultEditor, error::ReadlineError};
 
 const MAX_TOOL_ROUNDS: usize = 10;
 
@@ -10,28 +10,39 @@ async fn main() {
     let cfg = config::get();
     let model = cfg.model_name.read().unwrap().clone();
 
-    println!("Jarvis CLI (model: {model}). Ctrl+C to exit.");
+    println!("Jarvis CLI (model: {model}). Type 'exit' or Ctrl+D to quit.");
 
     let system_prompt = load_system_prompt();
     let mut history: Vec<serde_json::Value> = Vec::new();
 
+    let history_file = dirs_next::home_dir()
+        .map(|h| h.join(".jarvis_history"))
+        .unwrap_or_else(|| std::path::PathBuf::from(".jarvis_history"));
+
+    let mut rl = DefaultEditor::new().expect("failed to init readline");
+    let _ = rl.load_history(&history_file);
+
     loop {
-        print!("> ");
-        io::stdout().flush().unwrap();
-
-        let mut input = String::new();
-        match io::stdin().read_line(&mut input) {
-            Ok(0) | Err(_) => { println!("\nbye"); break; }
-            Ok(_) => {}
+        match rl.readline("> ") {
+            Ok(line) => {
+                let input = line.trim().to_string();
+                if input.is_empty() { continue; }
+                if input == "exit" || input == "quit" {
+                    println!("bye");
+                    break;
+                }
+                rl.add_history_entry(&input).ok();
+                history.push(serde_json::json!({"role": "user", "content": input}));
+                let reply = run_agent(&system_prompt, &mut history, cfg).await;
+                println!("{reply}");
+            }
+            Err(ReadlineError::Interrupted) => { println!("^C"); continue; }
+            Err(ReadlineError::Eof) => { println!("bye"); break; }
+            Err(e) => { eprintln!("readline error: {e}"); break; }
         }
-        let input = input.trim();
-        if input.is_empty() { continue; }
-
-        history.push(serde_json::json!({"role": "user", "content": input}));
-
-        let reply = run_agent(&system_prompt, &mut history, cfg).await;
-        println!("{reply}");
     }
+
+    let _ = rl.save_history(&history_file);
 }
 
 fn load_system_prompt() -> String {
