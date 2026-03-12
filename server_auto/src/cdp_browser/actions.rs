@@ -115,13 +115,22 @@ pub async fn linkedin_feed() -> Result<Vec<LinkedInPost>> {
         var items = document.querySelectorAll('.feed-shared-update-v2');
         for (var i = 0; i < items.length; i++) {
             var el = items[i];
-            var authorEl = el.querySelector('.update-components-actor__name');
+            var authorEl = el.querySelector('.update-components-actor__name') ||
+                           el.querySelector('.update-components-actor__title') ||
+                           el.querySelector('[class*="actor__name"]');
             var textEl = el.querySelector('.feed-shared-text') ||
-                         el.querySelector('.update-components-text');
+                         el.querySelector('.update-components-text') ||
+                         el.querySelector('.attributed-text-segment-list__content');
             var likesEl = el.querySelector('.social-details-social-counts');
             if (authorEl) {
                 posts.push({
-                    author: authorEl.textContent.trim(),
+                    author: (function(t) {
+                        // Remove duplicate names (e.g. "Jim TarantinoJim Tarantino")
+                        t = t.trim().split('\n')[0].trim();
+                        var half = Math.floor(t.length / 2);
+                        if (half > 2 && t.slice(0, half) === t.slice(half)) t = t.slice(0, half);
+                        return t;
+                    })(authorEl.textContent),
                     text: textEl ? textEl.textContent.trim() : '',
                     likes: likesEl ? likesEl.textContent.trim() : ''
                 });
@@ -146,11 +155,18 @@ pub async fn linkedin_like(post_index: usize, dry_run: bool) -> Result<Value> {
         var items = document.querySelectorAll('.feed-shared-update-v2');
         var el = items[{post_index}];
         if (!el) return JSON.stringify({{error: 'post not found'}});
-        var authorEl = el.querySelector('.update-components-actor__name');
-        var textEl = el.querySelector('.feed-shared-text') || el.querySelector('.update-components-text');
+        var authorEl = el.querySelector('.update-components-actor__name') ||
+                       el.querySelector('.update-components-actor__title') ||
+                       el.querySelector('[class*="actor__name"]');
+        var textEl = el.querySelector('.feed-shared-text') ||
+                     el.querySelector('.update-components-text') ||
+                     el.querySelector('.attributed-text-segment-list__content');
         var likeBtn = el.querySelector('button[aria-label*="Like"]') || el.querySelector('.reactions-react-button');
+        var authorRaw = authorEl ? authorEl.textContent.trim().split('\n')[0].trim() : '';
+        var half = Math.floor(authorRaw.length / 2);
+        if (half > 2 && authorRaw.slice(0, half) === authorRaw.slice(half)) authorRaw = authorRaw.slice(0, half);
         return JSON.stringify({{
-            author: authorEl ? authorEl.textContent.trim() : '',
+            author: authorRaw,
             text: textEl ? textEl.textContent.trim().slice(0, 200) : '',
             like_button_found: likeBtn !== null
         }});

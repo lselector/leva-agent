@@ -38,14 +38,18 @@ echo "Profile: $CDP_PROFILE"
     --no-default-browser-check \
     "$@" &
 
-sleep 3
-if curl -s "http://127.0.0.1:$PORT/json" > /dev/null 2>&1; then
-    TAB_COUNT=$(curl -s "http://127.0.0.1:$PORT/json" | python3 -c "import sys,json; print(len(json.load(sys.stdin)))" 2>/dev/null || echo "?")
-    echo "Chrome CDP ready on :$PORT ($TAB_COUNT tabs)"
-    echo ""
-    echo "NOTE: This is a separate Chrome profile."
-    echo "Log into Gmail and LinkedIn in this window to use those tools."
-else
-    echo "Warning: Chrome launched but CDP not yet responding."
-    echo "Wait a moment, then: curl http://127.0.0.1:$PORT/json"
-fi
+# Wait up to 20s for CDP to respond (Chrome on first launch can be slow)
+for i in $(seq 1 20); do
+    if curl -s "http://127.0.0.1:$PORT/json" > /dev/null 2>&1; then
+        TAB_COUNT=$(curl -s "http://127.0.0.1:$PORT/json" | jq 'length' 2>/dev/null || echo "?")
+        echo "Chrome CDP ready on :$PORT ($TAB_COUNT tabs)"
+        echo ""
+        echo "NOTE: This is a separate Chrome profile."
+        echo "Log into Gmail and LinkedIn in this window to use those tools."
+        exit 0
+    fi
+    sleep 1
+done
+
+echo "Warning: Chrome launched but CDP not yet responding after 20s."
+echo "Check: curl http://127.0.0.1:$PORT/json"

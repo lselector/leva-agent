@@ -135,3 +135,59 @@ pub async fn stream_chat(
 fn sse_json(val: &Value) -> String {
     format!("data: {}\n\n", serde_json::to_string(val).unwrap_or_default())
 }
+
+/// Non-streaming chat with tool-call loop. Returns the final reply text.
+pub async fn non_stream_chat(messages: Vec<Value>) -> Result<String, String> {
+    let cfg = config::get();
+    let model = cfg.model_name.read().unwrap().clone();
+    let tool_schemas = registry::get_tools_schema();
+    let mut msgs = messages;
+
+    for _round in 0..MAX_TOOL_ROUNDS {
+        let request_body = serde_json::json!({
+            "model": model,
+            "messages": msgs,
+            "tools": tool_schemas,
+            "tool_choice": "auto",
+        });
+
+        let resp = reqwest::Client::new()
+            .post("https://api.openai.com/v1/chat/completions")
+            .bearer_auth(&cfg.openai_api_key)
+            .json(&request_body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        let json: Value = resp.json().await.map_err(|e| e.to_string())?;
+        let choice = &json["choices"][0];
+        let finish_reason = choice["finish_reason"].as_str().unwrap_or("");
+        let message = &choice["message"];
+
+        if finish_reason != "tool_calls" {
+            return Ok(message["content"].as_str().unwrap_or("").to_string());
+        }
+
+        // Append assistant message with tool_calls
+        msgs.push(message.clone());
+
+        // Execute each tool
+        if let Some(tool_calls) = message["tool_calls"].as_array() {
+            for tc in tool_calls {
+                let id = tc["id"].as_str().unwrap_or("").to_string();
+                let name = tc["function"]["name"].as_str().unwrap_or("");
+                let args: HashMap<String, Value> = serde_json::from_str(
+                    tc["function"]["arguments"].as_str().unwrap_or("{}")
+                ).unwrap_or_default();
+                let result = tool_dispatch::execute(name, &args).await;
+                msgs.push(serde_json::json!({
+                    "role": "tool",
+                    "tool_call_id": id,
+                    "content": result,
+                }));
+            }
+        }
+    }
+
+    Ok(String::new())
+}

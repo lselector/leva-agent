@@ -11,7 +11,7 @@ use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt as _;
 use common::{config, tools::memory::soul_read};
 use crate::session_store::AppState;
-use crate::streaming::stream_chat;
+use crate::streaming::{stream_chat, non_stream_chat};
 
 #[derive(Deserialize)]
 pub struct ChatRequest {
@@ -97,25 +97,8 @@ async fn chat_endpoint(
             .body(body)
             .unwrap()
     } else {
-        let cfg = config::get();
-        let body = serde_json::json!({
-            "model": cfg.model_name.read().unwrap().clone(),
-            "messages": messages,
-        });
-        let resp = reqwest::Client::new()
-            .post("https://api.openai.com/v1/chat/completions")
-            .bearer_auth(&cfg.openai_api_key)
-            .json(&body)
-            .send()
-            .await;
-
-        match resp {
-            Ok(r) => {
-                let json: Value = r.json().await.unwrap_or_default();
-                let answer = json["choices"][0]["message"]["content"]
-                    .as_str()
-                    .unwrap_or("")
-                    .to_string();
+        match non_stream_chat(messages).await {
+            Ok(answer) => {
                 state.store.add_message(&sid, "assistant", &answer);
                 axum::response::Response::builder()
                     .header("Content-Type", "application/json")

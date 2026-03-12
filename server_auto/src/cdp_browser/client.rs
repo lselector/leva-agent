@@ -30,7 +30,10 @@ pub async fn list_tabs() -> Result<Vec<TabInfo>> {
 
 /// Open a new Chrome tab and return its TabInfo.
 pub async fn new_tab(url: &str) -> Result<TabInfo> {
-    let resp = reqwest::get(format!("{CDP_HTTP}/json/new?{url}")).await?;
+    let resp = reqwest::Client::new()
+        .put(format!("{CDP_HTTP}/json/new?{url}"))
+        .send()
+        .await?;
     let tab: TabInfo = resp.json().await?;
     Ok(tab)
 }
