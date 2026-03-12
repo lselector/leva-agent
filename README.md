@@ -39,8 +39,8 @@ entirely on your laptop with **no database**.
 
 ```bash
 # 1. Clone & enter the repo
-git clone git@github.com:lselector/jarvis_lev.git
-cd jarvis_lev
+git clone git@github.com:lselector/leva-agent.git
+cd leva-agent
 
 # 2. Install dependencies
 ./setup

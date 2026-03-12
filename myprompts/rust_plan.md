@@ -1,7 +1,7 @@
 # Jarvis Rust Conversion Plan
 
 ## Goal
-Rewrite jarvis_lev from Python (FastAPI + uvicorn) to Rust (Axum + Tokio),
+Rewrite leva-agent from Python (FastAPI + uvicorn) to Rust (Axum + Tokio),
 preserving all functionality: two-server architecture, SSE streaming, tool
 calling, CDP browser automation, Gmail API, and the 3-layer memory system.
 

@@ -18,4 +18,4 @@ Lev Selector
 - Git / GitHub
 
 ## Working Directory
-~/Documents/GitHub/jarvis_lev
+~/Documents/GitHub/leva-agent
