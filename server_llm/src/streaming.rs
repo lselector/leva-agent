@@ -1,16 +1,4 @@
 /// SSE streaming with tool-call loop — async-openai based.
-use async_openai::{
-    config::OpenAIConfig,
-    types::{
-        ChatCompletionRequestMessage, ChatCompletionRequestAssistantMessageArgs,
-        ChatCompletionRequestToolMessageArgs, ChatCompletionRequestUserMessageArgs,
-        ChatCompletionRequestSystemMessageArgs,
-        CreateChatCompletionRequestArgs,
-        ChatCompletionToolArgs, FunctionObjectArgs,
-        ChatCompletionMessageToolCall,
-    },
-    Client,
-};
 use futures::StreamExt;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -25,11 +13,7 @@ pub async fn stream_chat(
     tx: tokio::sync::mpsc::Sender<String>,
 ) {
     let cfg = config::get();
-    let api_key = cfg.openai_api_key.clone();
     let model = cfg.model_name.read().unwrap().clone();
-
-    let openai_cfg = OpenAIConfig::new().with_api_key(api_key);
-    let client = Client::with_config(openai_cfg);
 
     // Build tool list for OpenAI
     let tool_schemas = registry::get_tools_schema();

@@ -2,7 +2,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use super::client::{close_tab, list_tabs, open_session};
+use super::client::{close_tab, open_session};
 
 // ---------------------------------------------------------------
 

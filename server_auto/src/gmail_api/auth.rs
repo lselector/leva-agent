@@ -1,11 +1,11 @@
 /// Gmail OAuth2 authentication using saved token.json.
 /// First-run: prints URL for user to open; subsequent runs reuse saved token.
 use anyhow::{bail, Result};
-use base64::Engine;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use common::config;
 
+#[allow(dead_code)]
 const SCOPES: &[&str] = &[
     "https://www.googleapis.com/auth/gmail.readonly",
     "https://www.googleapis.com/auth/gmail.send",

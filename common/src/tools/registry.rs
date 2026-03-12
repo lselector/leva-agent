@@ -13,17 +13,6 @@ pub fn execute(name: &str, args: &HashMap<String, Value>) -> String {
             .and_then(|v| v.as_str())
             .unwrap_or("")
     };
-    let int_arg = |key: &str, default: i64| -> i64 {
-        args.get(key)
-            .and_then(|v| v.as_i64())
-            .unwrap_or(default)
-    };
-    let bool_arg = |key: &str, default: bool| -> bool {
-        args.get(key)
-            .and_then(|v| v.as_bool())
-            .unwrap_or(default)
-    };
-
     match name {
         "file_read" => files::file_read(str_arg("path"))
             .unwrap_or_else(|e| format!("Error: {e}")),

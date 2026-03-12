@@ -1,7 +1,6 @@
 /// Per-session short-term message history (in-memory + disk).
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
-use anyhow::Result;
 use crate::types::ChatMessage;
 use crate::config;
 

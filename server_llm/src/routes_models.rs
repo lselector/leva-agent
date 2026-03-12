@@ -1,6 +1,6 @@
 /// Model selection endpoints — GET /api/models, PUT /api/models/current
 use axum::{routing::{get, put}, Router, Json};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use common::config;
 
 const AVAILABLE_MODELS: &[&str] = &[

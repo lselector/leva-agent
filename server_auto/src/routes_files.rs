@@ -1,6 +1,6 @@
 /// File operation endpoints — /files/list, /files/read, /files/write
 use axum::{routing::{get, post}, Router, Json};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::Value;
 use std::path::PathBuf;
 use common::config;

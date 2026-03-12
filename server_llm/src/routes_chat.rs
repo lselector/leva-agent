@@ -64,8 +64,6 @@ async fn chat_endpoint(
 
     if req.stream.unwrap_or(true) {
         let (tx, rx) = mpsc::channel::<String>(256);
-        let store = state.store.clone();
-        let sid_clone = sid.clone();
 
         tokio::spawn(async move {
             stream_chat(messages, tx.clone()).await;

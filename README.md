@@ -45,7 +45,7 @@ cd jarvis_lev
 # 2. Install dependencies
 ./setup
 
-# 3. Configure your API key
+# 3. Configure your API key (if env var OPENAI_API_KEY is not set)
 cp .env.example .env
 # edit .env and set OPENAI_API_KEY
 
@@ -98,17 +98,17 @@ PERPLEXITY_API_KEY=pplx-...
 ## Architecture
 
 ```
-┌─────────────┐     ┌──────────────┐
+┌──────────────┐     ┌───────────────┐
 │  Browser UI  │────▶│  Server A     │
 │  (frontend/) │◀────│  LLM Gateway  │
 │              │ SSE │  :8000        │
-└─────────────┘     └──────┬───────┘
+└──────────────┘     └─────┬─────────┘
                            │ HTTP
-                    ┌──────▼───────┐
+                    ┌──────▼────────┐
                     │  Server B     │
                     │  Automation   │
                     │  :8001        │
-                    └──────────────┘
+                    └───────────────┘
 ```
 
 - **Server A** (port 8000): Serves the frontend,

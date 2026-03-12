@@ -1,6 +1,6 @@
 /// File read/write tools — sandboxed to the workspace BASE_DIR.
 use anyhow::{bail, Result};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use crate::config;
 
 fn safe_path(rel: &str) -> Result<PathBuf> {
