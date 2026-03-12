@@ -1,7 +1,39 @@
 /// Jarvis CLI — interactive REPL with tool-call loop.
 use std::collections::HashMap;
+use std::borrow::Cow;
 use common::{config, tools::{memory::soul_read, registry}};
-use rustyline::{DefaultEditor, error::ReadlineError};
+use rustyline::{Editor, Config, KeyEvent, KeyCode, Modifiers, Cmd, error::ReadlineError,
+                history::DefaultHistory, hint::HistoryHinter, highlight::Highlighter};
+use rustyline_derive::{Completer, Helper, Validator};
+
+// Helper combining history hints with dim-coloured rendering.
+#[derive(Helper, Completer, Validator)]
+struct JarvisHelper {
+    hinter: HistoryHinter,
+}
+
+impl rustyline::hint::Hinter for JarvisHelper {
+    type Hint = String;
+    fn hint(&self, line: &str, pos: usize, ctx: &rustyline::Context<'_>) -> Option<String> {
+        self.hinter.hint(line, pos, ctx)
+    }
+}
+
+impl Highlighter for JarvisHelper {
+    // Render the inline hint in dim grey.
+    fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
+        Cow::Owned(format!("\x1b[2m{hint}\x1b[0m"))
+    }
+    fn highlight<'l>(&self, line: &'l str, _pos: usize) -> Cow<'l, str> {
+        Cow::Borrowed(line)
+    }
+    fn highlight_char(&self, _line: &str, _pos: usize, _forced: bool) -> bool { false }
+    fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
+        &'s self, prompt: &'p str, _default: bool,
+    ) -> Cow<'b, str> {
+        Cow::Borrowed(prompt)
+    }
+}
 
 const MAX_TOOL_ROUNDS: usize = 10;
 
@@ -19,7 +51,14 @@ async fn main() {
         .map(|h| h.join(".jarvis_history"))
         .unwrap_or_else(|| std::path::PathBuf::from(".jarvis_history"));
 
-    let mut rl = DefaultEditor::new().expect("failed to init readline");
+    let config = Config::builder().history_ignore_space(true).build();
+    let helper = JarvisHelper { hinter: HistoryHinter::new() };
+    let mut rl = Editor::<JarvisHelper, DefaultHistory>::with_config(config)
+        .expect("failed to init readline");
+    rl.set_helper(Some(helper));
+    // Up/Down search backwards/forwards through history matching the typed prefix.
+    rl.bind_sequence(KeyEvent(KeyCode::Up, Modifiers::NONE), Cmd::HistorySearchBackward);
+    rl.bind_sequence(KeyEvent(KeyCode::Down, Modifiers::NONE), Cmd::HistorySearchForward);
     let _ = rl.load_history(&history_file);
 
     loop {

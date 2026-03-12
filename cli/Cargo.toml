@@ -19,5 +19,6 @@ tracing-subscriber = { workspace = true }
 reqwest = { workspace = true }
 async-openai = { workspace = true }
 futures = { workspace = true }
-rustyline = { version = "14", features = ["with-file-history"] }
+rustyline = { version = "14", features = ["with-file-history", "derive"] }
+rustyline-derive = "0.10"
 dirs-next = "2"
