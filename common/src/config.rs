@@ -6,6 +6,9 @@ static CONFIG: OnceLock<Config> = OnceLock::new();
 
 pub struct Config {
     pub base_dir: PathBuf,
+    /// Private repo dir (LEVA_AGENT_PRIV_DIR), if set.
+    /// Used for credentials, memory, and private skills/resources.
+    pub priv_dir: Option<PathBuf>,
     pub prompts_dir: PathBuf,
     pub soul_dir: PathBuf,
     pub memory_dir: PathBuf,
@@ -21,41 +24,59 @@ pub struct Config {
 
 impl Config {
     fn load() -> Self {
-        // Load .env from project root (rust_version/../.env)
+        // Resolve the private repo dir early (it's a system env var, set before
+        // any .env loading) so we can load secrets from there.
+        let priv_dir: Option<PathBuf> = std::env::var("LEVA_AGENT_PRIV_DIR").ok().map(|p| {
+            let pb = PathBuf::from(p);
+            pb.canonicalize().unwrap_or(pb)
+        });
+
+        // Load .env: prefer $LEVA_AGENT_PRIV_DIR/.env (private secrets), then
+        // fall back to the project root .env found by walking up from the binary.
+        if let Some(ref pd) = priv_dir {
+            let priv_env = pd.join(".env");
+            if priv_env.exists() {
+                let _ = dotenvy::from_path(&priv_env);
+            }
+        }
+
+        // Walk up from the executable to find the project-root .env.
         let exe = std::env::current_exe().unwrap_or_default();
-        // Walk up to find the .env file
         let mut dir = exe.parent().unwrap_or(std::path::Path::new(".")).to_path_buf();
         loop {
             let candidate = dir.join(".env");
             if candidate.exists() {
+                // Use from_path_override=false equivalent: dotenvy::from_path does
+                // not override already-set vars, so priv .env values take precedence.
                 let _ = dotenvy::from_path(&candidate);
                 break;
             }
             if !dir.pop() {
-                // Fallback: try cwd
                 let _ = dotenvy::dotenv();
                 break;
             }
         }
 
-        // BASE_DIR is two levels above the rust_version/src/ —
-        // i.e., the repository root containing frontend/, soul/, etc.
-        // At runtime the binary lives in rust_version/target/…, so we
-        // derive BASE_DIR from the CARGO_MANIFEST_DIR set at compile time.
+        // BASE_DIR is the repository root containing frontend/, soul/, etc.
         let base_dir = PathBuf::from(
             std::env::var("LEVA_BASE_DIR")
                 .unwrap_or_else(|_| "../..".to_string()),
         );
-        // Canonicalize so relative paths work wherever the binary runs
         let base_dir = base_dir.canonicalize().unwrap_or(base_dir);
 
-        let memory_dir = base_dir.join("memory");
+        // credentials and memory live in the private repo when LEVA_AGENT_PRIV_DIR
+        // is set; otherwise fall back to base_dir (original behaviour).
+        let data_root = priv_dir.clone().unwrap_or_else(|| base_dir.clone());
+        let memory_dir = data_root.join("memory");
+        let credentials_dir = data_root.join("credentials");
+        let memory_topics_dir = memory_dir.join("topics");
 
         Config {
+            priv_dir,
             prompts_dir: base_dir.join("prompts"),
             soul_dir: base_dir.join("soul"),
-            memory_topics_dir: memory_dir.join("topics"),
-            credentials_dir: base_dir.join("credentials"),
+            memory_topics_dir,
+            credentials_dir,
             reference_dir: base_dir.join("reference"),
             memory_dir,
             base_dir,
