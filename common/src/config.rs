@@ -43,7 +43,7 @@ impl Config {
         // At runtime the binary lives in rust_version/target/…, so we
         // derive BASE_DIR from the CARGO_MANIFEST_DIR set at compile time.
         let base_dir = PathBuf::from(
-            std::env::var("JARVIS_BASE_DIR")
+            std::env::var("LEVA_BASE_DIR")
                 .unwrap_or_else(|_| "../..".to_string()),
         );
         // Canonicalize so relative paths work wherever the binary runs

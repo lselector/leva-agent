@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Set up Jarvis after a fresh clone.
+# Set up Leva after a fresh clone.
 # Run once before ./start
 #
 # Usage:  ./setup
@@ -20,7 +20,7 @@ echo "Created runtime directories (memory/sessions, memory/topics, reference, cr
 
 # ── 3. Build ─────────────────────────────────────────────────────────────────
 echo ""
-echo "Building Jarvis (Rust)..."
+echo "Building Leva (Rust)..."
 cargo build --release
 
 echo ""

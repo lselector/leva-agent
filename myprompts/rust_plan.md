@@ -1,4 +1,4 @@
-# Jarvis Rust Conversion Plan
+# Leva Rust Conversion Plan
 
 ## Goal
 Rewrite leva-agent from Python (FastAPI + uvicorn) to Rust (Axum + Tokio),
@@ -26,7 +26,7 @@ calling, CDP browser automation, Gmail API, and the 3-layer memory system.
 
 ## Phase 1 — Project Scaffold
 
-- [ ] 1.1  Init Rust workspace: `cargo new jarvis_rust --name jarvis`
+- [ ] 1.1  Init Rust workspace: `cargo new leva_rust --name leva`
 - [ ] 1.2  Create workspace `Cargo.toml` with two crates:
           `server_llm` (port 8000) and `server_auto` (port 8001)
 - [ ] 1.3  Add shared `common` crate for types, config, tools

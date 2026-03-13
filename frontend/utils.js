@@ -1,4 +1,4 @@
-/* Shared utility helpers for Jarvis frontend. */
+/* Shared utility helpers for Leva frontend. */
 
 /**
  * Shorthand for document.getElementById.

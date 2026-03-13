@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Gmail automation in Jarvis uses Playwright
+The Gmail automation in Leva uses Playwright
 to control a Chromium browser and interact with
 Gmail's web interface. It can read your inbox,
 compose emails, and send them.
@@ -81,9 +81,9 @@ self._context = await self._pw.chromium.launch_persistent_context(
 profile that is currently open in another Chrome
 instance. Before testing, you must:
 1. Quit Google Chrome completely
-2. Then start Jarvis
+2. Then start Leva
 
-### Step 4: Start Jarvis
+### Step 4: Start Leva
 
 ```bash
 ./start
@@ -120,8 +120,8 @@ curl -s -X POST \
   -H "Content-Type: application/json" \
   -d '{
     "to": "test@example.com",
-    "subject": "Test from Jarvis",
-    "body": "Hello from Jarvis AI agent!"
+    "subject": "Test from Leva",
+    "body": "Hello from Leva AI agent!"
   }' | python -m json.tool
 ```
 
@@ -130,7 +130,7 @@ Expected response:
 {
   "status": "draft_ready",
   "to": "test@example.com",
-  "subject": "Test from Jarvis",
+  "subject": "Test from Leva",
   "note": "Draft composed. Call
     /browser/gmail/send-confirm
     to actually send."
@@ -156,7 +156,7 @@ curl -s -X POST \
 
 ### "Error: browser closed"
 - Make sure Chrome is fully quit before
-  starting Jarvis (Playwright needs exclusive
+  starting Leva (Playwright needs exclusive
   access to the profile)
 
 ### Gmail shows login page

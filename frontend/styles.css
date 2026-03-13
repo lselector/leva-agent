@@ -1,5 +1,5 @@
 /* ============================================
-   Jarvis — Single Style File
+   Leva — Single Style File
    All styles for the entire application.
    No inline styles anywhere.
    ============================================ */
@@ -240,9 +240,12 @@ body {
 }
 
 .session-item {
-  padding: 8px 12px;
-  font-size: 12px;
-  color: var(--text-secondary);
+  padding: 1px 12px;
+  min-height: 20px;
+  box-sizing: border-box;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-primary);
   cursor: pointer;
   border-radius: var(--radius-sm);
   white-space: nowrap;

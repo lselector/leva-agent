@@ -16,10 +16,11 @@ PORT=9222
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 CDP_PROFILE="$HOME/Library/Application Support/Google/ChromeCDP"
 
-# --- Already running with CDP? ---
+# --- Already running with CDP? Kill and restart ---
 if curl -s "http://127.0.0.1:$PORT/json" > /dev/null 2>&1; then
-    echo "Chrome CDP already running on :$PORT"
-    exit 0
+    echo "Chrome CDP already running on :$PORT — restarting..."
+    pkill -f "remote-debugging-port=$PORT" 2>/dev/null
+    sleep 1
 fi
 
 # --- Reset option ---
@@ -37,7 +38,7 @@ echo "Profile: $CDP_PROFILE"
     --no-first-run \
     --no-default-browser-check \
     --disable-blink-features=AutomationControlled \
-    "$@" &
+    "$@" 2>/dev/null &
 
 # Wait up to 20s for CDP to respond (Chrome on first launch can be slow)
 for i in $(seq 1 20); do

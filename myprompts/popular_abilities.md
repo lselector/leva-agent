@@ -1,6 +1,6 @@
-## Comparison: Our Jarvis vs OpenClaw
+## Comparison: Our Leva vs OpenClaw
 
-### What our Jarvis currently has:
+### What our Leva currently has:
 - CLI REPL channel (text input/output)
 - OpenAI chat completions (gpt-4.1-mini)
 - File read/write within workspace

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stop Jarvis Rust servers (ports 8000 & 8001)
+# Stop Leva Rust servers (ports 8000 & 8001)
 # Usage: ./stop
 
 killed=0
@@ -20,7 +20,7 @@ fi
 
 if [ "$killed" -eq 1 ]; then
     sleep 1
-    echo "Jarvis stopped."
+    echo "Leva stopped."
 else
-    echo "No Jarvis processes found."
+    echo "No Leva processes found."
 fi

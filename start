@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start Jarvis (Rust version).
+# Start Leva (Rust version).
 #
 # Usage:
 #   ./start        — web UI (both servers)
@@ -18,11 +18,18 @@ if [ ! -f "$BIN_DIR/server_llm" ]; then
     exit 1
 fi
 
-# Export JARVIS_BASE_DIR so the Rust code finds frontend/, soul/, etc.
-export JARVIS_BASE_DIR="$(pwd)"
+# Export LEVA_BASE_DIR so the Rust code finds frontend/, soul/, etc.
+export LEVA_BASE_DIR="$(pwd)"
 
 if [ "${1}" = "cli" ]; then
-    exec "$BIN_DIR/jarvis-cli"
+    # Start server_auto in background if not already running
+    if ! lsof -i :8001 -sTCP:LISTEN -t &>/dev/null; then
+        echo "Starting Server Auto on http://localhost:8001"
+        "$BIN_DIR/server_auto" &
+        SERVER_AUTO_PID=$!
+        trap "kill $SERVER_AUTO_PID 2>/dev/null" EXIT INT TERM
+    fi
+    exec "$BIN_DIR/leva-cli"
 fi
 
 # Start both servers

@@ -1,4 +1,4 @@
-/// Jarvis CLI — interactive REPL with tool-call loop.
+/// Leva CLI — interactive REPL with tool-call loop.
 use std::collections::HashMap;
 use std::borrow::Cow;
 use common::{config, tools::{memory::soul_read, registry}};
@@ -8,18 +8,18 @@ use rustyline_derive::{Completer, Helper, Validator};
 
 // Helper combining history hints with dim-coloured rendering.
 #[derive(Helper, Completer, Validator)]
-struct JarvisHelper {
+struct LevaHelper {
     hinter: HistoryHinter,
 }
 
-impl rustyline::hint::Hinter for JarvisHelper {
+impl rustyline::hint::Hinter for LevaHelper {
     type Hint = String;
     fn hint(&self, line: &str, pos: usize, ctx: &rustyline::Context<'_>) -> Option<String> {
         self.hinter.hint(line, pos, ctx)
     }
 }
 
-impl Highlighter for JarvisHelper {
+impl Highlighter for LevaHelper {
     // Render the inline hint in dim grey.
     fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
         Cow::Owned(format!("\x1b[2m{hint}\x1b[0m"))
@@ -42,18 +42,18 @@ async fn main() {
     let cfg = config::get();
     let model = cfg.model_name.read().unwrap().clone();
 
-    println!("Jarvis CLI (model: {model}). Type 'exit' or Ctrl+D to quit.");
+    println!("Leva CLI (model: {model}). Type 'exit' or Ctrl+D to quit.");
 
     let system_prompt = load_system_prompt();
     let mut history: Vec<serde_json::Value> = Vec::new();
 
     let history_file = dirs_next::home_dir()
-        .map(|h| h.join(".jarvis_history"))
-        .unwrap_or_else(|| std::path::PathBuf::from(".jarvis_history"));
+        .map(|h| h.join(".leva_history"))
+        .unwrap_or_else(|| std::path::PathBuf::from(".leva_history"));
 
     let config = Config::builder().history_ignore_space(true).build();
-    let helper = JarvisHelper { hinter: HistoryHinter::new() };
-    let mut rl = Editor::<JarvisHelper, DefaultHistory>::with_config(config)
+    let helper = LevaHelper { hinter: HistoryHinter::new() };
+    let mut rl = Editor::<LevaHelper, DefaultHistory>::with_config(config)
         .expect("failed to init readline");
     rl.set_helper(Some(helper));
     // Up/Down search backwards/forwards through history matching the typed prefix.

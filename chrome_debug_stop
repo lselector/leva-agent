@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Stop Chrome CDP (remote debugging on port 9222).
+
+PORT=9222
+
+if pkill -f "remote-debugging-port=$PORT" 2>/dev/null; then
+    echo "Chrome CDP stopped."
+else
+    echo "No Chrome CDP process found on :$PORT"
+fi

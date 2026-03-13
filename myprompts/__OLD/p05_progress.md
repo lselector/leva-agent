@@ -69,7 +69,7 @@ Reference: see `p05.md` for the full plan.
   include router. Added port configs to
   `src/config.py`. curl test returns
   `{"reply":"Hello!","session_id":null}`.
-  Browser test: typed "Hello Jarvis!", got
+  Browser test: typed "Hello Leva!", got
   reply "Hello Lev! Great to hear from you.
   How can I assist you today?" All tests OK.
 

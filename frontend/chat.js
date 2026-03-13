@@ -197,7 +197,7 @@ function showWelcome() {
     '<div class="welcome-message">' +
     '<span class="welcome-icon">⚡</span>' +
     '<span class="welcome-title">' +
-    "Hello! I'm Jarvis" +
+    "Hello! I'm Leva" +
     "</span>" +
     '<span class="welcome-subtitle">' +
     "Your local AI assistant. " +
@@ -280,7 +280,7 @@ function addMessage(role, content) {
   div.classList.add("message-" + role);
 
   var roleLabel = role === "user"
-    ? "You" : "Jarvis";
+    ? "You" : "Leva";
   var bodyHtml = role === "assistant"
     ? renderMarkdown(content)
     : escapeHtml(content);
@@ -306,7 +306,7 @@ function addStreamingMessage() {
   div.classList.add("message-assistant");
   div.id = "streaming-msg";
   div.innerHTML =
-    '<div class="message-role">Jarvis</div>' +
+    '<div class="message-role">Leva</div>' +
     '<div class="message-body"></div>';
   msgs.appendChild(div);
   scrollToBottom();
@@ -323,7 +323,7 @@ function showLoading() {
   div.classList.add("message-assistant");
   div.id = "loading-msg";
   div.innerHTML =
-    '<div class="message-role">Jarvis</div>' +
+    '<div class="message-role">Leva</div>' +
     '<div class="loading-dots">' +
     '<span class="loading-dot"></span>' +
     '<span class="loading-dot"></span>' +
@@ -474,7 +474,7 @@ async function sendStreaming(text, files) {
     addMessage(
       "assistant",
       "Error: could not reach server. " +
-      "Is Jarvis running?"
+      "Is Leva running?"
     );
   } finally {
     isSending = false;

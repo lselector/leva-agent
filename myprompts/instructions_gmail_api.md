@@ -29,7 +29,7 @@ faster, more reliable, and Google-approved.
 
 1. Go to https://console.cloud.google.com
 2. Click "Select a project" → "New Project"
-3. Name it "Jarvis Gmail" (or similar)
+3. Name it "Leva Gmail" (or similar)
 4. Click "Create"
 
 ### Step 2: Enable Gmail API
@@ -45,7 +45,7 @@ faster, more reliable, and Google-approved.
 2. Choose "External" (or "Internal" if
    using Google Workspace)
 3. Fill in:
-   - App name: "Jarvis"
+   - App name: "Leva"
    - User support email: your email
    - Developer contact: your email
 4. Click "Save and Continue"
@@ -63,7 +63,7 @@ faster, more reliable, and Google-approved.
 1. Go to: APIs & Services → Credentials
 2. Click "Create Credentials" → "OAuth client ID"
 3. Application type: "Desktop app"
-4. Name: "Jarvis Desktop"
+4. Name: "Leva Desktop"
 5. Click "Create"
 6. Click "Download JSON"
 7. Save the file as:
@@ -109,8 +109,8 @@ curl -s -X POST \
   -H "Content-Type: application/json" \
   -d '{
     "to": "test@example.com",
-    "subject": "Test from Jarvis",
-    "body": "Hello from Jarvis AI!"
+    "subject": "Test from Leva",
+    "body": "Hello from Leva AI!"
   }' | python -m json.tool
 ```
 
@@ -187,7 +187,7 @@ app.include_router(router)
 
 ### "Access blocked: app not verified"
 - This is normal for new OAuth apps
-- Click "Advanced" → "Go to Jarvis (unsafe)"
+- Click "Advanced" → "Go to Leva (unsafe)"
 - Or publish the app for production use
 
 ### "Token expired"
@@ -204,6 +204,6 @@ app.include_router(router)
 
 After setup is complete:
 1. Register Gmail tools with the LLM so
-   Jarvis can read/send emails via chat
+   Leva can read/send emails via chat
 2. Add email summarization capabilities
 3. Add draft management (save, edit, delete)

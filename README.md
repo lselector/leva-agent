@@ -1,4 +1,4 @@
-# Jarvis – Local AI Agent with Web UI
+# Leva – Local AI Agent with Web UI
 
 A lightweight, local AI agent inspired by
 [OpenClaw](https://docs.openclaw.ai/) that runs

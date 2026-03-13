@@ -1,6 +1,6 @@
 # Agents
 
-## Primary Agent: Jarvis
+## Primary Agent: Leva
 
 - **Role**: General-purpose assistant
 - **Model**: gpt-4.1-mini (configurable)
