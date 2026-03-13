@@ -15,8 +15,22 @@ if ! command -v cargo &>/dev/null; then
 fi
 
 # ── 2. Create required runtime directories ────────────────────────────────────
-mkdir -p memory/sessions memory/topics reference credentials
-echo "Created runtime directories (memory/sessions, memory/topics, reference, credentials)"
+# If LEVA_AGENT_PRIV_DIR is set, credentials and memory live there.
+if [ -n "$LEVA_AGENT_PRIV_DIR" ]; then
+    echo "LEVA_AGENT_PRIV_DIR=$LEVA_AGENT_PRIV_DIR"
+    mkdir -p "$LEVA_AGENT_PRIV_DIR/credentials"
+    mkdir -p "$LEVA_AGENT_PRIV_DIR/memory/sessions"
+    mkdir -p "$LEVA_AGENT_PRIV_DIR/memory/topics"
+    echo "Created private runtime directories in $LEVA_AGENT_PRIV_DIR"
+else
+    echo "WARNING: LEVA_AGENT_PRIV_DIR is not set."
+    echo "  Credentials and memory will be stored in this repo (not recommended)."
+    echo "  Set LEVA_AGENT_PRIV_DIR to point to your private repo to keep secrets separate."
+    mkdir -p memory/sessions memory/topics credentials
+    echo "Created runtime directories (memory/sessions, memory/topics, credentials)"
+fi
+mkdir -p reference
+echo "Created reference directory"
 
 # ── 3. Build ─────────────────────────────────────────────────────────────────
 echo ""
@@ -27,9 +41,20 @@ echo ""
 echo "Done."
 echo ""
 echo "Next steps:"
-echo "  1. Ensure OPENAI_API_KEY is set in your shell (or create .env from .env.example)"
-echo "  2. ./start"
+if [ -n "$LEVA_AGENT_PRIV_DIR" ]; then
+    echo "  1. Add OPENAI_API_KEY to $LEVA_AGENT_PRIV_DIR/.env"
+    echo "  2. ./start"
+    echo ""
+    echo "Optional — Gmail integration:"
+    echo "  Place gmail_credentials.json and gmail_token.json in $LEVA_AGENT_PRIV_DIR/credentials/"
+    echo "  Add GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN to $LEVA_AGENT_PRIV_DIR/.env"
+else
+    echo "  1. Ensure OPENAI_API_KEY is set in your shell (or add it to .env)"
+    echo "  2. ./start"
+    echo ""
+    echo "Optional — Gmail integration:"
+    echo "  Place gmail_credentials.json in credentials/"
+    echo "  See README.md for details"
+fi
 echo ""
-echo "Optional — Gmail integration only:"
-echo "  Place your Gmail OAuth credentials in credentials/"
-echo "  See README.md for details"
+echo "See README.md for full setup instructions."

@@ -42,20 +42,66 @@ entirely on your laptop with **no database**.
 git clone git@github.com:lselector/leva-agent.git
 cd leva-agent
 
-# 2. Install dependencies
+# 2. (Recommended) Set up a private repo for secrets — see "Private Repo" section below
+export LEVA_AGENT_PRIV_DIR=~/path/to/your-private-repo
+
+# 3. Run setup (creates runtime directories, builds Rust binaries)
 ./setup
 
-# 3. Configure your API key (if env var OPENAI_API_KEY is not set)
-cp .env.example .env
-# edit .env and set OPENAI_API_KEY
+# 4. Add your API key to the private .env (or export it in your shell)
+echo "OPENAI_API_KEY=sk-..." >> $LEVA_AGENT_PRIV_DIR/.env
 
-# 4. Run the web UI
+# 5. Run the web UI
 ./start
 # Opens at http://localhost:8000
 
-# 5. Or run the CLI
+# 6. Or run the CLI
 ./start cli
 ```
+
+## Private Repo (Recommended)
+
+Leva separates **code** (this repo, safe to push publicly) from **private data**
+(secrets, memory, credentials) stored in a separate private repo.
+
+### Setup
+
+```bash
+# 1. Create a private repo (e.g. on GitHub as a private repository)
+git clone git@github.com:yourname/leva-agent-priv.git ~/leva-agent-priv
+
+# 2. Export the env var — add this to your shell profile (~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish, etc.)
+export LEVA_AGENT_PRIV_DIR=~/leva-agent-priv
+# Fish shell:
+# set -gx LEVA_AGENT_PRIV_DIR ~/leva-agent-priv
+
+# 3. Run ./setup — it will create the required dirs inside the private repo
+./setup
+
+# 4. Put your secrets in the private .env
+#    The agent loads $LEVA_AGENT_PRIV_DIR/.env before the project .env,
+#    so private values always take precedence.
+cat >> $LEVA_AGENT_PRIV_DIR/.env <<'EOF'
+OPENAI_API_KEY=sk-...
+PERPLEXITY_API_KEY=pplx-...
+GMAIL_CLIENT_ID=...
+GMAIL_CLIENT_SECRET=...
+GMAIL_REFRESH_TOKEN=...
+EOF
+```
+
+### What lives where
+
+| Directory / File | Repo |
+|---|---|
+| Source code, prompts, soul | `leva-agent/` (this repo) |
+| `credentials/` (Gmail OAuth tokens) | `leva-agent-priv/` |
+| `memory/` (daily logs, sessions, topics) | `leva-agent-priv/` |
+| `.env` (API keys, secrets) | `leva-agent-priv/` |
+| `reference/` (document library) | `leva-agent/` |
+
+If `LEVA_AGENT_PRIV_DIR` is **not** set, everything falls back to this repo
+(original single-repo behaviour).
 
 ## New API Endpoints (Server B :8001)
 
@@ -76,22 +122,25 @@ cp .env.example .env
 ### Setup: Gmail OAuth2
 ```bash
 # 1. Download credentials from Google Cloud Console
-#    → save as credentials/gmail_credentials.json
-# 2. Run one-time auth flow
-python -m src.gmail_api.auth
-# Browser opens → log in → grant access → done
+#    → save as $LEVA_AGENT_PRIV_DIR/credentials/gmail_credentials.json
+#      (or leva-agent/credentials/ if not using a private repo)
+
+# 2. Add Gmail OAuth values to $LEVA_AGENT_PRIV_DIR/.env
+GMAIL_CLIENT_ID=...
+GMAIL_CLIENT_SECRET=...
+GMAIL_REFRESH_TOKEN=...
 ```
 
 ### Setup: Web / LinkedIn via CDP
 ```bash
 # Start Chrome with remote debugging
-./chrome_debug
+./chrome_debug_start
 # Chrome must stay running while using web/LinkedIn tools
 ```
 
 ### Setup: Perplexity fallback
 ```bash
-# Add to .env
+# Add to $LEVA_AGENT_PRIV_DIR/.env (or your shell)
 PERPLEXITY_API_KEY=pplx-...
 ```
 
@@ -123,60 +172,37 @@ PERPLEXITY_API_KEY=pplx-...
 ## Directory Layout
 
 ```
-├── start                  # Launch script
-├── pyproject.toml
-├── frontend/              # Web UI
-│   ├── index.html
-│   ├── styles.css         # All styles here
-│   ├── app.js             # Tab/session logic
-│   ├── chat.js            # Chat + streaming
-│   ├── files.js           # File browser
-│   ├── jobs.js            # Jobs panel
-│   ├── settings.js        # Model switching
-│   ├── markdown.js        # MD → HTML
-│   └── utils.js           # Helpers
-├── soul/                  # Layer 1 – Soul
+leva-agent/                   ← this repo (safe to make public)
+├── start                     # Launch script
+├── setup                     # One-time setup script
+├── .env                      # Non-secret defaults only (no API keys)
+├── frontend/                 # Web UI (HTML/JS)
+├── soul/                     # Layer 1 – Core identity (always loaded)
 │   ├── soul.md
 │   ├── agents.md
 │   └── user.md
-├── memory/                # Layer 2 – Memory
-│   ├── YYYY-MM-DD.md      # daily logs
-│   ├── sessions/          # chat sessions
-│   └── topics/
-├── reference/             # Layer 3 – Reference
-├── prompts/
+├── prompts/                  # System prompts
 │   ├── SYSTEM.md
 │   └── TOOLS.md
-├── src/
-│   ├── config.py          # paths & env vars
-│   ├── models.py          # LLM wrapper
-│   ├── agent_loop.py      # CLI agent loop
-│   ├── server_llm/        # Server A
-│   │   ├── app.py
-│   │   ├── routes_chat.py
-│   │   ├── routes_models.py
-│   │   ├── session_store.py
-│   │   ├── streaming.py
-│   │   └── tool_dispatch.py
-│   ├── server_auto/       # Server B
-│   │   ├── app.py
-│   │   ├── routes_files.py
-│   │   ├── routes_jobs.py
-│   │   ├── routes_browser.py
-│   │   ├── job_runner.py
-│   │   ├── browser_manager.py
-│   │   ├── gmail_actions.py
-│   │   └── linkedin_actions.py
-│   ├── channels/
-│   │   └── cli.py
-│   ├── tools/
-│   │   ├── base.py
-│   │   ├── files.py
-│   │   ├── memory_tools.py
-│   │   └── registry.py
-│   └── memory_store/
-│       └── short_term.py
-└── myprompts/             # dev prompts
+├── reference/                # Layer 3 – Document library
+├── common/                   # Shared Rust library
+│   └── src/
+│       ├── config.rs         # Paths & env vars (reads LEVA_AGENT_PRIV_DIR)
+│       ├── memory_store.rs   # Session storage
+│       └── tools/            # Tool implementations
+├── server_llm/               # Server A – LLM Gateway (:8000)
+├── server_auto/              # Server B – Automation (:8001)
+└── cli/                      # CLI REPL
+
+leva-agent-priv/              ← separate private repo (keep secret)
+├── .env                      # All API keys and secrets
+├── credentials/              # OAuth tokens (Gmail)
+│   ├── gmail_credentials.json
+│   └── gmail_token.json
+└── memory/                   # Layer 2 – Working memory
+    ├── YYYY-MM-DD.md         # daily logs
+    ├── sessions/             # chat sessions (JSON)
+    └── topics/               # topic summaries
 ```
 
 ## API Endpoints
