@@ -19,7 +19,7 @@ pub async fn web_search(query: &str) -> Result<Vec<SearchResult>> {
     let search_url = format!("https://www.google.com/search?q={encoded}");
     let (tab_id, mut session) = open_session(&search_url).await?;
 
-    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    session.wait_for_selector("h3", 3000).await?;
 
     let script = r#"
     (function() {
@@ -56,7 +56,7 @@ pub async fn web_search(query: &str) -> Result<Vec<SearchResult>> {
 /// Fetch a URL and return its main text content.
 pub async fn web_fetch(url: &str, max_chars: usize) -> Result<String> {
     let (tab_id, mut session) = open_session(url).await?;
-    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(300)).await;
 
     let script = r#"
     (function() {
@@ -87,7 +87,7 @@ pub async fn web_fetch(url: &str, max_chars: usize) -> Result<String> {
 /// Take a screenshot of a URL and return PNG bytes.
 pub async fn web_screenshot(url: &str) -> Result<Vec<u8>> {
     let (tab_id, mut session) = open_session(url).await?;
-    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(300)).await;
     let png = session.screenshot().await?;
     let _ = close_tab(&tab_id).await;
     Ok(png)
@@ -113,9 +113,9 @@ pub async fn linkedin_feed() -> Result<Vec<LinkedInPost>> {
                 (id, s, true)
             }
         };
-    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    session.wait_for_selector(".feed-shared-update-v2", 4000).await?;
     session.evaluate("window.scrollBy(0, 800)").await?;
-    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
 
     let script = r#"
     (function() {
@@ -163,7 +163,7 @@ pub async fn linkedin_like(post_index: usize, dry_run: bool) -> Result<Value> {
                 (id, s, true)
             }
         };
-    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    session.wait_for_selector(".feed-shared-update-v2", 4000).await?;
 
     let info_script = format!(r#"
     (function() {{

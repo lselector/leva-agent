@@ -32,12 +32,19 @@ fi
 # --- Launch CDP Chrome alongside regular Chrome ---
 echo "Starting CDP Chrome on :$PORT ..."
 echo "Profile: $CDP_PROFILE"
-"$CHROME" \
+arch -arm64 "$CHROME" \
     --remote-debugging-port=$PORT \
     --user-data-dir="$CDP_PROFILE" \
     --no-first-run \
     --no-default-browser-check \
     --disable-blink-features=AutomationControlled \
+    --no-proxy-server \
+    --disable-sync \
+    --disable-translate \
+    --disable-extensions \
+    --password-store=basic \
+    --metrics-recording-only \
+    --disable-client-side-phishing-detection \
     "$@" 2>/dev/null &
 
 # Wait up to 20s for CDP to respond (Chrome on first launch can be slow)

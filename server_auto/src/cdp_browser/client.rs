@@ -102,6 +102,23 @@ impl CdpSession {
         Ok(()) // timeout — continue anyway
     }
 
+    /// Poll until `document.querySelector(selector)` returns non-null, or `max_ms` elapses.
+    pub async fn wait_for_selector(&mut self, selector: &str, max_ms: u64) -> Result<()> {
+        let script = format!(
+            "document.querySelector({:?}) !== null",
+            selector
+        );
+        let steps = (max_ms / 100).max(1);
+        for _ in 0..steps {
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+            let result = self.evaluate(&script).await?;
+            if result.as_bool() == Some(true) {
+                return Ok(());
+            }
+        }
+        Ok(()) // timeout — continue anyway
+    }
+
     pub async fn evaluate(&mut self, script: &str) -> Result<Value> {
         let result = self.send("Runtime.evaluate", json!({
             "expression": script,
