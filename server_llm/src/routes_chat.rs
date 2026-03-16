@@ -11,7 +11,8 @@ use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt as _;
 use common::{config, tools::memory::soul_read};
 use crate::session_store::AppState;
-use crate::streaming::{stream_chat, non_stream_chat};
+use crate::streaming::stream_chat;
+use crate::anthropic_stream::non_stream_chat_anthropic;
 
 #[derive(Deserialize)]
 pub struct ChatRequest {
@@ -81,7 +82,9 @@ async fn chat_endpoint(
                     let data = line.trim_start_matches("data: ").trim();
                     if let Ok(obj) = serde_json::from_str::<Value>(data) {
                         if let Some(ft) = obj["full_text"].as_str() {
-                            store2.add_message(&sid2, "assistant", ft);
+                            if !ft.is_empty() {
+                                store2.add_message(&sid2, "assistant", ft);
+                            }
                         }
                     }
                 }
@@ -97,7 +100,7 @@ async fn chat_endpoint(
             .body(body)
             .unwrap()
     } else {
-        match non_stream_chat(messages).await {
+        match non_stream_chat_anthropic(messages).await {
             Ok(answer) => {
                 state.store.add_message(&sid, "assistant", &answer);
                 axum::response::Response::builder()

@@ -1,3 +1,4 @@
+mod anthropic_stream;
 mod routes_chat;
 mod routes_models;
 mod session_store;

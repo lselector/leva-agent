@@ -4,11 +4,9 @@ use serde::Deserialize;
 use common::config;
 
 const AVAILABLE_MODELS: &[&str] = &[
-    "gpt-4.1-mini",
-    "gpt-4.1",
-    "gpt-4o",
-    "gpt-4o-mini",
-    "o3-mini",
+    "claude-sonnet-4-6",
+    "claude-opus-4-6",
+    "claude-haiku-4-5-20251001",
 ];
 
 #[derive(Deserialize)]

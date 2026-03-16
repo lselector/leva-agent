@@ -459,11 +459,20 @@ async function sendStreaming(text, files) {
               fullText
             );
             scrollToBottom();
+          } else if (obj.status) {
+            bodyEl.innerHTML =
+              '<span class="tool-status">' +
+              escapeHtml(obj.status) + '</span>';
           }
         } catch (e) {
           /* skip parse errors */
         }
       }
+    }
+
+    /* If model used tools but returned no text, show a fallback */
+    if (!fullText) {
+      bodyEl.innerHTML = renderMarkdown("Done.");
     }
 
     /* Remove streaming ID */

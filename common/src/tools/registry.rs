@@ -93,6 +93,10 @@ pub fn get_tools_schema() -> Vec<Value> {
             json!({"type":"object","properties":{"to":{"type":"string"},"subject":{"type":"string"},"body":{"type":"string"}},"required":["to","subject","body"]})),
         tool("gmail_search", "Search Gmail using query syntax (e.g. 'is:unread', 'from:bob').",
             json!({"type":"object","properties":{"query":{"type":"string"},"max_results":{"type":"integer"}},"required":["query"]})),
+        tool("gmail_get_email", "Get the full content of an email by its ID.",
+            json!({"type":"object","properties":{"id":{"type":"string","description":"Gmail message ID."}},"required":["id"]})),
+        tool("gmail_forward", "Forward an existing email to another recipient. Use this — NOT gmail_send — whenever the user asks to forward an email. Fetches the full original email body and re-sends it with 'Fwd:' subject prefix and the original headers + body quoted.",
+            json!({"type":"object","properties":{"id":{"type":"string","description":"Gmail message ID to forward."},"to":{"type":"string","description":"Recipient email address."}},"required":["id","to"]})),
         tool("web_search", "Search the web via Google and return top results.",
             json!({"type":"object","properties":{"query":{"type":"string"}},"required":["query"]})),
         tool("web_fetch", "Fetch a URL and return its main text content.",
@@ -104,6 +108,18 @@ pub fn get_tools_schema() -> Vec<Value> {
         tool("web_research", "Research a topic using Perplexity AI (web-grounded, no browser needed).",
             json!({"type":"object","properties":{"query":{"type":"string"}},"required":["query"]})),
     ]
+}
+
+/// Return tool schemas in Anthropic format (name/description/input_schema).
+pub fn get_anthropic_tools_schema() -> Vec<Value> {
+    get_tools_schema().into_iter().map(|t| {
+        let f = &t["function"];
+        json!({
+            "name": f["name"],
+            "description": f["description"],
+            "input_schema": f["parameters"],
+        })
+    }).collect()
 }
 
 fn tool(name: &str, description: &str, parameters: Value) -> Value {

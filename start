@@ -21,14 +21,21 @@ fi
 # Export LEVA_BASE_DIR so the Rust code finds frontend/, soul/, etc.
 export LEVA_BASE_DIR="$(pwd)"
 
-if [ "${1}" = "cli" ]; then
-    # Start server_auto in background if not already running
-    if ! lsof -i :8001 -sTCP:LISTEN -t &>/dev/null; then
-        echo "Starting Server Auto on http://localhost:8001"
-        "$BIN_DIR/server_auto" &
-        SERVER_AUTO_PID=$!
-        trap "kill $SERVER_AUTO_PID 2>/dev/null" EXIT INT TERM
+# Kill any previously running servers
+for PORT in 8000 8001; do
+    PIDS=$(lsof -i :$PORT -sTCP:LISTEN -t 2>/dev/null || true)
+    if [ -n "$PIDS" ]; then
+        echo "Stopping existing process on port $PORT (pid $PIDS)"
+        kill $PIDS 2>/dev/null || true
+        sleep 0.3
     fi
+done
+
+if [ "${1}" = "cli" ]; then
+    echo "Starting Server Auto on http://localhost:8001"
+    "$BIN_DIR/server_auto" &
+    SERVER_AUTO_PID=$!
+    trap "kill $SERVER_AUTO_PID 2>/dev/null" EXIT INT TERM
     exec "$BIN_DIR/leva-cli"
 fi
 

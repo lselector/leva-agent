@@ -15,6 +15,9 @@ pub fn router() -> Router {
         .route("/tools/gmail_inbox", post(tool_inbox))
         .route("/tools/gmail_send", post(tool_send))
         .route("/tools/gmail_search", post(tool_search))
+        .route("/tools/gmail_get_email", post(tool_get_email))
+        .route("/tools/gmail_forward", post(tool_forward))
+        .route("/debug/gmail_raw/{id}", get(debug_raw))
 }
 
 #[derive(Deserialize)] struct InboxReq { max_results: Option<u32> }
@@ -80,6 +83,30 @@ async fn tool_search(Json(args): Json<Value>) -> String {
     match client::search_emails(query, max).await {
         Ok(msgs) => serde_json::to_string(&msgs).unwrap_or_default(),
         Err(e) => format!("Error: {e}"),
+    }
+}
+
+async fn tool_get_email(Json(args): Json<Value>) -> String {
+    let id = args["id"].as_str().unwrap_or("");
+    match client::get_email(id).await {
+        Ok(msg) => serde_json::to_string(&msg).unwrap_or_default(),
+        Err(e) => format!("Error: {e}"),
+    }
+}
+
+async fn debug_raw(Path(id): Path<String>) -> String {
+    match client::get_raw_payload(&id).await {
+        Ok(v) => serde_json::to_string_pretty(&v).unwrap_or_default(),
+        Err(e) => format!("Error: {e}"),
+    }
+}
+
+async fn tool_forward(Json(args): Json<Value>) -> String {
+    let id = args["id"].as_str().unwrap_or("");
+    let to = args["to"].as_str().unwrap_or("");
+    match client::forward_email(id, to).await {
+        Ok(_) => format!("Email forwarded successfully to {to}."),
+        Err(e) => format!("Error forwarding email: {e}"),
     }
 }
 

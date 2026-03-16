@@ -496,6 +496,12 @@ body {
   animation-delay: 0.4s;
 }
 
+.tool-status {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 13px;
+}
+
 @keyframes dotPulse {
   0%, 80%, 100% {
     opacity: 0.3;
