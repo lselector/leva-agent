@@ -1,6 +1,6 @@
 # Leva – Local AI Agent with Web UI
 
-A lightweight, local AI agent inspired by
+A lightweight, local AI agent built on top of
 [OpenClaw](https://docs.openclaw.ai/) that runs
 entirely on your laptop with **no database**.
 
@@ -49,7 +49,7 @@ export LEVA_AGENT_PRIV_DIR=~/path/to/your-private-repo
 ./setup
 
 # 4. Add your API key to the private .env (or export it in your shell)
-echo "OPENAI_API_KEY=sk-..." >> $LEVA_AGENT_PRIV_DIR/.env
+echo "ANTHROPIC_API_KEY=sk-ant-..." >> $LEVA_AGENT_PRIV_DIR/.env
 
 # 5. Run the web UI
 ./start
@@ -82,7 +82,7 @@ export LEVA_AGENT_PRIV_DIR=~/leva-agent-priv
 #    The agent loads $LEVA_AGENT_PRIV_DIR/.env before the project .env,
 #    so private values always take precedence.
 cat >> $LEVA_AGENT_PRIV_DIR/.env <<'EOF'
-OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
 PERPLEXITY_API_KEY=pplx-...
 GMAIL_CLIENT_ID=...
 GMAIL_CLIENT_SECRET=...

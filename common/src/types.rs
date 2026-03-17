@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------
-// Chat message (OpenAI wire format)
+// Chat message
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatMessage {
@@ -59,7 +59,7 @@ impl ChatMessage {
 }
 
 // ---------------------------------------------------------------
-// Tool call (OpenAI wire format)
+// Tool call
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ToolCall {

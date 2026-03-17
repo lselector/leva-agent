@@ -7,13 +7,18 @@ use crate::tool_dispatch;
 
 const MAX_TOOL_ROUNDS: usize = 10;
 
+fn is_model_unavailable(body: &str) -> bool {
+    body.contains("overloaded") || body.contains("not_found") || body.contains("unavailable")
+}
+
 /// Yield SSE lines for a chat request using Anthropic Claude.
 pub async fn stream_chat_anthropic(
     messages: Vec<Value>,
     tx: tokio::sync::mpsc::Sender<String>,
 ) {
     let cfg = config::get();
-    let model = cfg.model_name.read().unwrap().clone();
+    let primary = cfg.model_name.read().unwrap().clone();
+    let mut model = primary.clone();
 
     // Extract system message; convert rest to Anthropic user/assistant format
     let mut system = String::new();
@@ -63,6 +68,11 @@ pub async fn stream_chat_anthropic(
             let status = response.status();
             let body = response.text().await.unwrap_or_default();
             eprintln!("[ANTHROPIC] error {} : {}", status, body);
+            if is_model_unavailable(&body) && model == primary {
+                eprintln!("[ANTHROPIC] {} unavailable, falling back to {}", model, cfg.fallback_model);
+                model = cfg.fallback_model.clone();
+                continue;
+            }
             let _ = tx.send(sse_json(&json!({"error": format!("Anthropic API error {}: {}", status, body)}))).await;
             return;
         }
@@ -182,7 +192,8 @@ fn sse_json(val: &Value) -> String {
 /// Non-streaming Anthropic chat with tool-call loop. Returns the final reply text.
 pub async fn non_stream_chat_anthropic(messages: Vec<Value>) -> Result<String, String> {
     let cfg = config::get();
-    let model = cfg.model_name.read().unwrap().clone();
+    let primary = cfg.model_name.read().unwrap().clone();
+    let mut model = primary.clone();
     let tools = registry::get_anthropic_tools_schema();
 
     let mut system = String::new();
@@ -213,6 +224,11 @@ pub async fn non_stream_chat_anthropic(messages: Vec<Value>) -> Result<String, S
 
         let json: Value = resp.json().await.map_err(|e| e.to_string())?;
         if let Some(err) = json["error"]["message"].as_str() {
+            if is_model_unavailable(err) && model == primary {
+                eprintln!("[ANTHROPIC] {} unavailable, falling back to {}", model, cfg.fallback_model);
+                model = cfg.fallback_model.clone();
+                continue;
+            }
             return Err(err.to_string());
         }
 

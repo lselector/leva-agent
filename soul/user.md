@@ -14,7 +14,7 @@ Lev Selector
 - Python 3.13.12
 - macOS
 - VS Code
-- OpenAI API
+- Anthropic Claude API
 - Git / GitHub
 
 ## Working Directory

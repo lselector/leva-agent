@@ -17,6 +17,7 @@ pub struct Config {
     pub credentials_dir: PathBuf,
     pub anthropic_api_key: String,
     pub model_name: std::sync::RwLock<String>,
+    pub fallback_model: String,
     pub llm_port: u16,
     pub auto_port: u16,
     pub perplexity_api_key: String,
@@ -72,8 +73,10 @@ impl Config {
             anthropic_api_key: std::env::var("ANTHROPIC_API_KEY").unwrap_or_default(),
             model_name: std::sync::RwLock::new(
                 std::env::var("MODEL_NAME")
-                    .unwrap_or_else(|_| "claude-sonnet-4-6".to_string()),
+                    .unwrap_or_else(|_| "claude-opus-4-6".to_string()),
             ),
+            fallback_model: std::env::var("FALLBACK_MODEL")
+                .unwrap_or_else(|_| "claude-sonnet-4-6".to_string()),
             llm_port: std::env::var("LLM_PORT").ok().and_then(|v| v.parse().ok()).unwrap_or(8000),
             auto_port: std::env::var("AUTO_PORT").ok().and_then(|v| v.parse().ok()).unwrap_or(8001),
             perplexity_api_key: std::env::var("PERPLEXITY_API_KEY").unwrap_or_default(),

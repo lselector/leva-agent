@@ -1,4 +1,4 @@
-/// Tool registry — maps names to functions and builds OpenAI JSON schemas.
+/// Tool registry — maps names to functions and builds Anthropic tool schemas.
 use serde_json::{json, Value};
 use std::collections::HashMap;
 
@@ -60,7 +60,7 @@ pub fn local_tool_names() -> &'static [&'static str] {
     ]
 }
 
-/// Return all tool schemas in OpenAI format.
+/// Return all tool schemas (legacy format, kept for internal use).
 pub fn get_tools_schema() -> Vec<Value> {
     vec![
         tool("file_read", "Read a small text file from the workspace.",
